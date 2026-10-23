@@ -689,23 +689,69 @@ test("Overview customization moves and hides its sections, and CipherVault is al
   expect(titles.indexOf("From your notebook")).toBeLessThan(
     titles.indexOf("Your daily rituals"),
   );
-  await page
-    .locator(".sidebar")
-    .getByRole("link", { name: "CipherVault", exact: false })
-    .click();
+  const [companion] = await Promise.all([
+    page.waitForEvent("popup"),
+    page
+      .locator(".sidebar")
+      .getByRole("link", { name: "CipherVault", exact: false })
+      .click(),
+  ]);
+  await expect(companion).toHaveURL(/\/ciphervault$/);
   await expect(
-    page.getByRole("heading", {
-      name: "A private place for your test secrets.",
-      exact: true,
+    companion.getByRole("heading", {
+      name: "Your secrets. Your custody.",
+      exact: false,
     }),
   ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: "Open local CipherVault", exact: false }),
-  ).toHaveAttribute("target", "_blank");
-  await expect(
-    page.getByText("npm run dev:vault", { exact: true }),
-  ).toBeVisible();
-  await expect(page.locator(".warning")).toContainText(
+  await expect(companion.locator(".sidebar")).toHaveCount(0);
+  await expect(companion.locator("a[href*='localhost']")).toHaveCount(0);
+  await expect(companion.locator(".cipher-prototype")).toContainText(
     "dummy credentials only",
   );
+});
+
+test("theme toggle works from login and workspace, persists, and follows system mode", async ({
+  page,
+}) => {
+  await page.goto("/login");
+  const toggle = page.getByRole("switch", { name: "Dark theme", exact: true });
+  await expect(toggle).not.toBeChecked();
+  await toggle.click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.reload();
+  await expect(toggle).toBeChecked();
+  await page
+    .getByRole("button", { name: "Create an account", exact: false })
+    .click();
+  const authScan = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(
+    authScan.violations.map((v) => ({
+      id: v.id,
+      nodes: v.nodes.map((n) => ({
+        target: n.target,
+        summary: n.failureSummary,
+      })),
+    })),
+  ).toEqual([]);
+  await page.goto("/demo");
+  await page
+    .getByRole("button", { name: "Explore sample workspace", exact: true })
+    .click();
+  await page.getByRole("switch", { name: "Dark theme", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.reload();
+  await expect(
+    page.getByRole("switch", { name: "Dark theme", exact: true }),
+  ).toBeChecked();
+  await page.goto("/demo/settings");
+  await page.getByLabel("Appearance").selectOption("system");
+  await page
+    .getByRole("button", { name: "Save preferences", exact: true })
+    .click();
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });

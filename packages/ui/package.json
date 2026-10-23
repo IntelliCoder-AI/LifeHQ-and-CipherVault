@@ -4,7 +4,8 @@
   "private": true,
   "exports": {
     ".": "./index.tsx",
-    "./styles.css": "./styles.css"
+    "./styles.css": "./styles.css",
+    "./theme": "./theme.tsx"
   },
   "dependencies": {
     "react": "19.3.1",

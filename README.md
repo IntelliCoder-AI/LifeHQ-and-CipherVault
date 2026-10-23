@@ -26,7 +26,7 @@ npm run dev:vault    # CipherVault: http://localhost:3001
 
 Open `/login` to create an account, or `/demo` to explore an empty local workspace. “Explore sample workspace” loads clearly labeled sample records **only into your browser**. Account workspaces start empty. The two apps must keep different origins; never embed the vault in LifeHQ or place them under paths on one origin.
 
-The always-visible CipherVault entry in LifeHQ explains how to start the separate local app. CipherVault needs no environment variables or account. Create a dummy master passphrase, acknowledge the prototype warning, and add test items. Keep an encrypted backup: clearing browser storage, losing the passphrase, or losing the device can permanently lose the local vault.
+The always-visible CipherVault entry opens its standalone product page and launches the separate web app. CipherVault can also run locally using the command above. Its web hosting delivers the interface; encrypted records stay in your browser. CipherVault needs no environment variables or account. Create a dummy master passphrase, acknowledge the prototype warning, and add test items. Keep an encrypted backup: clearing browser storage, losing the passphrase, or losing the device can permanently lose the local vault.
 
 ## What is implemented
 
@@ -35,7 +35,7 @@ The always-visible CipherVault entry in LifeHQ explains how to start the separat
 - Day/week/month planning, time blocks, per-occurrence moves and cancellations, keyboard-accessible date editing, and project deadlines.
 - Projects and milestones; measurable goals and linked actions; dated habit histories and deterministic streaks.
 - Markdown notes with autosave, folders, tags, favorites, pins, duplication, import/export, and safe preview.
-- Analytics, daily/weekly reflections, command search, themes, preferences, data export, and confirmed account deletion.
+- Analytics, daily/weekly reflections, command search, header theme toggles, system appearance, preferences, data export, and confirmed account deletion.
 - Signup password confirmation and a Show passwords checkbox; Supabase cookie sessions, server validation, version conflict checks, owner RLS, and same-owner foreign keys.
 - Local Argon2id/AES-256-GCM vault, generator, locking, encrypted backup/restore, and passphrase re-encryption.
 

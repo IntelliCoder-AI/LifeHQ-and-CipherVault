@@ -26,10 +26,10 @@ The browser tests default to ports 3000 and 3001. `LIFEHQ_BASE_URL` and `VAULT_B
 
 Verification was performed on 2026-10-23. The final result ledger is in [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md).
 
-- **40 Vitest tests passed** across domain recurrence/progress, React primitives, cryptography, and real PostgreSQL RLS via PGlite.
+- **43 Vitest tests passed** across domain recurrence/progress, React primitives, cryptography, and real PostgreSQL RLS via PGlite.
 - Strict TypeScript and ESLint passed for both applications.
 - Both optimized Next.js production builds passed. A first restricted-sandbox build failed because Turbopack could not bind its local worker port; clearing its failed generated cache and rerunning with local network permission succeeded.
-- **22 Playwright tests passed against optimized production builds**, including responsive layouts, signup confirmation/visibility, local navigation/history, Overview section ordering, and CipherVault discoverability. The palette refresh exposed one low-contrast secondary label in the plum theme; its token was corrected and the complete suite passed. Final signup inspection also tightened muted illustration-text contrast and waits for bundled fonts before scanning. Subsequent small mobile-label enlargement was checked with the relevant responsive/accessibility tests.
+- **23 Playwright tests passed against optimized production builds**, including responsive layouts, signup confirmation/visibility, local navigation/history, Overview section ordering, and CipherVault discoverability. The palette refresh exposed one low-contrast secondary label in the plum theme; its token was corrected and the complete suite passed. Final signup inspection also tightened muted illustration-text contrast and waits for bundled fonts before scanning. Subsequent small mobile-label enlargement was checked with the relevant responsive/accessibility tests.
 - Production dependency audit reported zero known vulnerabilities at the time of inspection. Supabase security advisors reported no findings after both migrations.
 
 ## Scope and evidence
@@ -65,3 +65,7 @@ A GitHub Actions verification workflow is committed. Its hosted result is unveri
 ## Navigation measurement
 
 A six-section local Chromium sequence previously triggered six server-component requests; the same sequence now triggers zero. One idle local run measured a median click-to-heading interval of 101ms versus 159ms in the baseline. These small local samples are diagnostic, not a hosted performance guarantee. Functions are configured in Mumbai alongside the database region; hosted latency and large-workspace performance remain unmeasured.
+
+The auth routing regression tests assert that public pages and API routes skip middleware session work while protected workspace pages still reject an unverified identity. Each data API retains its own authenticated check. Browser coverage includes the theme toggle on login and workspace, persistence across reload, system theme changes, the independent CipherVault page, and absence of localhost launch links. CipherVault setup is scanned in both themes.
+
+The latest security advisor reported leaked-password protection disabled. No paid Auth setting was enabled. This does not change the existing prototype-only vault restriction.

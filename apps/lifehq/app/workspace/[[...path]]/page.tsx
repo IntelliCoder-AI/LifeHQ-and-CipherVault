@@ -4,9 +4,7 @@ import { Workspace } from "@/components/workspace";
 export default async function Page() {
   if (!configured()) redirect("/login");
   const db = await supabase();
-  const {
-    data: { user },
-  } = await db.auth.getUser();
-  if (!user) redirect("/login");
+  const { data } = await db.auth.getClaims();
+  if (!data?.claims?.sub) redirect("/login");
   return <Workspace demo={false} />;
 }

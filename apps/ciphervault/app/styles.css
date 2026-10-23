@@ -1,3 +1,30 @@
+/* CipherVault owns its palette and geometry, independent of LifeHQ. */
+:root {
+  --paper: #f5f0e7;
+  --surface: #fffaf1;
+  --ink: #55422e;
+  --muted: #6f5b43;
+  --accent-primary: #8b5824;
+  --accent-soft: #eedecc;
+  --stone: #e8dfd1;
+  --line: #d9cbb7;
+  --copper: #80551f;
+  --copper-soft: #f2e4cb;
+  --sidebar: #ece4d6;
+}
+[data-theme="dark"] {
+  --paper: #44382c;
+  --surface: #514333;
+  --ink: #fff0d8;
+  --muted: #e3cdb0;
+  --accent-primary: #f0c37d;
+  --accent-soft: #725a3d;
+  --stone: #69553f;
+  --line: #967a5b;
+  --copper: #f5d092;
+  --copper-soft: #725535;
+  --sidebar: #3f3429;
+}
 .vault-app {
   min-height: 100vh;
   display: flex;
@@ -814,5 +841,103 @@
   }
   .password-generator .button {
     font-size: 13px;
+  }
+}
+
+.vault-brand {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 1.3px;
+}
+.vault-brand > span:first-child {
+  border-radius: 10px 3px;
+  background: transparent;
+  color: var(--accent-primary);
+  border: 1px solid var(--accent-primary);
+  width: 42px;
+  height: 42px;
+}
+.vault-brand-dot {
+  display: none;
+}
+.vault-gate-story h1 {
+  font-family: "DM Sans", sans-serif;
+  font-size: 64px;
+  font-weight: 500;
+  letter-spacing: -3px;
+  line-height: 1.1;
+}
+.vault-gate-story h1 em {
+  font-style: normal;
+}
+.vault-gate-form {
+  border-radius: 16px 4px;
+  border-top: 3px solid var(--accent-primary);
+}
+.vault-app .button {
+  border-radius: 4px;
+}
+.lock-illustration > div {
+  border-radius: 25px 5px;
+}
+.vault-detail-title h2 {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  letter-spacing: -0.6px;
+}
+.vault-gate-story > .eyebrow {
+  letter-spacing: 0.16em;
+}
+@media (max-width: 600px) {
+  .vault-header {
+    padding-inline: 18px;
+    gap: 8px;
+  }
+  .vault-brand {
+    font-size: 16px;
+    gap: 7px;
+    letter-spacing: 0.3px;
+  }
+  .vault-brand > span:first-child {
+    width: 32px;
+    height: 32px;
+  }
+  .vault-header .row {
+    gap: 6px;
+  }
+  .vault-header .badge {
+    font-size: 11px;
+    gap: 4px;
+  }
+  .vault-gate-story h1 {
+    font-size: 45px;
+    letter-spacing: -2px;
+  }
+}
+
+.vault-app h1,
+.vault-app h2 {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+}
+@media (max-width: 600px) {
+  .vault-header {
+    height: auto;
+    min-height: 76px;
+    padding-block: 14px;
+  }
+  .vault-brand {
+    flex-shrink: 0;
+  }
+  .vault-header > .row {
+    flex: 1;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .vault-header .button {
+    font-size: 12px;
+    padding-inline: 8px;
+    gap: 4px;
   }
 }

@@ -66,3 +66,9 @@ The managed environment blocks direct access to both `lifehq-radhe12.vercel.app`
 Keep it on localhost at a different port/origin for this delivery. It needs no Supabase project or runtime secrets. Run `npm run dev:vault`, or after `npm run build` run `npm run start -w @lifehq/vault`.
 
 Publishing the prototype's code would still serve a sensitive unlock interface; the supplied specification requires explicit approval before deploying sensitive functionality. Any later approved publication must use a distinct HTTPS origin and retain the dummy-only, unaudited warnings. Hosting it does not add synchronization: encrypted data remains in that browser. Do not colocate it as `/vault` under LifeHQ, embed it in an iframe, add analytics, or share auth/storage. Independent security review is required before real credentials.
+
+## Separate CipherVault interface hosting
+
+CipherVault has its own Vercel project rooted at `apps/ciphervault`, with source files outside the root enabled and `cd ../.. && npm ci` as the install command. It needs no Supabase credentials. Point LifeHQ's `NEXT_PUBLIC_VAULT_URL` to the verified canonical HTTPS app address and rebuild LifeHQ. Production launch links reject a localhost URL; no production button should require a server on the visitor's computer.
+
+This hosts the prototype interface only. Ciphertexts remain in origin-bound browser IndexedDB, with no cloud sync or shared LifeHQ authentication. Use the stable canonical address: a different hostname has separate storage. Independent review remains required before real credentials. Existing Vercel project access protection is retained.

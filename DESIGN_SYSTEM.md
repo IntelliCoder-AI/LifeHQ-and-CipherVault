@@ -8,15 +8,17 @@ Tokens live in `packages/ui/styles.css`. DM Sans is the readable interface face;
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Paper | `#faf7f2` | `#49324a` |
-| Surface | `#fffdf9` | `#563c53` |
-| Ink | `#563b4b` | `#fff4e7` |
-| Muted text | `#755f6c` | `#e5cedb` |
-| Primary accent | `#80506b` | `#f2d6b3` |
-| Stone | `#eee4e5` | `#65495f` |
-| Brass accent | `#866030` | `#efd2a9` |
+| Paper | `#faf8f4` | `#493b30` |
+| Surface | `#fffefa` | `#55463a` |
+| Ink | `#514237` | `#fff5e7` |
+| Muted text | `#726354` | `#e5d3bf` |
+| Primary accent | `#9b4935` | `#f4c3a0` |
+| Stone | `#eee8df` | `#685244` |
+| Brass accent | `#805e25` | `#f2d29b` |
 
-Warm ivory, rosewood, plum, and brass replace the green palette. The evening theme uses visibly plum surfaces. Existing project color IDs remain compatible with saved records, while their displayed labels and colors use the new palette. Small-text accents meet the automated contrast checks; completed calendar items use solid readable text and strikethrough. Themes are purposefully composed, not inverted.
+LifeHQ uses neutral ivory surfaces, warm brown text, and restrained terracotta accents. Navigation uses a subtle active background and a thin accent rule. Warm walnut is the evening theme. The header toggle changes light/dark appearance immediately; Settings also supports system appearance. A nonce-authorized bootstrap applies saved appearance before first paint. Account preferences sync the workspace theme; the login page retains a nonsensitive device preference.
+
+CipherVault owns separate sandstone/ochre tokens, geometric branding, sans-serif headings, and a standalone lock screen. LifeHQ links to a standalone product page that launches the independent web origin. No vault unlock screen, keys, or encrypted records live in LifeHQ.
 
 Interface text is generally 16–18px, secondary labels 14–15px, and editorial panel headings 31px. Mobile layouts reflow around the larger type. Fonts remain locally bundled.
 

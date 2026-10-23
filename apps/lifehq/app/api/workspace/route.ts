@@ -10,29 +10,33 @@ export async function GET() {
     } = await db.auth.getUser();
     if (authError || !user)
       return json({ error: "Please sign in again." }, 401);
-    const results = await Promise.all(
-      tables.map(async (table) => {
-        const rows: unknown[] = [];
-        let offset = 0;
-        while (true) {
-          const { data, error } = await db
-            .from(table)
-            .select("*")
-            .order("id")
-            .range(offset, offset + 499);
-          if (error) throw new Error(`Could not load ${table}. Please retry.`);
-          rows.push(...data);
-          if (data.length < 500) break;
-          offset += 500;
-        }
-        return [table, rows];
-      }),
-    );
-    const { data: profile, error } = await db
+    const profileRequest = db
       .from("profiles")
       .select("preferences")
       .eq("user_id", user.id)
       .maybeSingle();
+    const [results, { data: profile, error }] = await Promise.all([
+      Promise.all(
+        tables.map(async (table) => {
+          const rows: unknown[] = [];
+          let offset = 0;
+          while (true) {
+            const { data, error } = await db
+              .from(table)
+              .select("*")
+              .order("id")
+              .range(offset, offset + 499);
+            if (error)
+              throw new Error(`Could not load ${table}. Please retry.`);
+            rows.push(...data);
+            if (data.length < 500) break;
+            offset += 500;
+          }
+          return [table, rows];
+        }),
+      ),
+      profileRequest,
+    ]);
     if (error) throw error;
     return json({
       data: Object.fromEntries(results),
@@ -57,13 +61,11 @@ export async function PATCH(request: Request) {
     } = await db.auth.getUser();
     if (!user) return json({ error: "Sign in again" }, 401);
     const preferences = preferencesSchema.parse(await body(request));
-    const { error } = await db
-      .from("profiles")
-      .upsert({
-        user_id: user.id,
-        preferences,
-        updated_at: new Date().toISOString(),
-      });
+    const { error } = await db.from("profiles").upsert({
+      user_id: user.id,
+      preferences,
+      updated_at: new Date().toISOString(),
+    });
     if (error) throw error;
     return json({ preferences });
   } catch (error) {

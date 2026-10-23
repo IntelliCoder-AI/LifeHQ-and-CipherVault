@@ -1,4 +1,5 @@
 "use client";
+import { ThemeToggle } from "@lifehq/ui/theme";
 import { useWorkspaceRouter } from "@/lib/navigation";
 import { Suspense, useEffect, useRef, useState, useMemo } from "react";
 import { WorkspaceLink as Link } from "@/lib/navigation";
@@ -136,6 +137,7 @@ function Shell() {
     busy,
     toast,
     message,
+    setPreferences,
   } = useWorkspace();
   const pathname = usePathname(),
     router = useWorkspaceRouter(),
@@ -274,14 +276,16 @@ function Shell() {
       <div className="sidebar-bottom">
         <Link
           className="vault-link"
-          href={`${base}/ciphervault`}
+          href="/ciphervault"
+          target="_blank"
+          rel="noopener noreferrer"
           aria-current={section === "ciphervault" ? "page" : undefined}
           onClick={() => setMobile(false)}
         >
           <ShieldCheck size={18} />
           <div>
             <strong>CipherVault</strong>
-            <small>Local encrypted vault</small>
+            <small>Separate encrypted app</small>
           </div>
           <ArrowUpRight size={14} />
         </Link>
@@ -306,6 +310,7 @@ function Shell() {
       </div>
     </>
   );
+  if (section === "ciphervault") return <VaultAccess />;
   return (
     <div className="app-shell">
       <aside className="sidebar">{sidebar}</aside>
@@ -330,6 +335,15 @@ function Shell() {
             </span>
           </div>
           <div className="row topbar-actions">
+            <ThemeToggle
+              onChange={(theme) =>
+                setPreferences({ ...preferences, theme }).catch(() =>
+                  toast(
+                    "Theme changed on this device. Account preference could not be saved.",
+                  ),
+                )
+              }
+            />
             {busy && (
               <span className="subtle row">
                 <LoaderCircle size={13} className="spin" />

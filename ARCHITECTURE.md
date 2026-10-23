@@ -2,9 +2,9 @@
 
 ## Boundaries
 
-LifeHQ and CipherVault are independent Next.js applications on separate origins. They share visual components, fonts, and styles. CipherVault does not import the Supabase client, LifeHQ data store, or LifeHQ domain models. Its only durable sensitive state is authenticated ciphertext in its own origin's IndexedDB. LifeHQ always shows a CipherVault navigation entry. It opens an explanatory access guide, whose launch link opens the separate local origin with no credential handoff. No vault unlock UI or cryptographic state is hosted inside LifeHQ.
+LifeHQ and CipherVault are independent Next.js applications on separate origins. They share visual components, fonts, and styles. CipherVault does not import the Supabase client, LifeHQ data store, or LifeHQ domain models. Its only durable sensitive state is authenticated ciphertext in its own origin's IndexedDB. LifeHQ always shows a CipherVault navigation entry. It opens a standalone companion product page, whose launch link opens the separately deployed CipherVault origin with no credential handoff. The UI is web-hosted; encrypted vault data remains local to that browser and origin. No vault unlock UI or cryptographic state is hosted inside LifeHQ.
 
-LifeHQ account pages use a client workspace store backed by same-origin API routes. Route handlers validate the Supabase user, validate inputs with Zod, and query PostgreSQL with the caller's session. No service-role credentials are used. Next.js `proxy.ts` refreshes cookie sessions and sets a fresh CSP nonce. Protected server pages verify the user again. Authenticated responses are private and not cached publicly.
+LifeHQ account pages use a client workspace store backed by same-origin API routes. Route handlers validate the Supabase user, validate inputs with Zod, and query PostgreSQL with the caller's session. No service-role credentials are used. Next.js `proxy.ts` refreshes cookie sessions and sets a fresh CSP nonce. Protected server pages verify signed claims; data API routes independently validate the current user. Public login, auth API, and companion-product pages skip session-refresh middleware, preventing a stale session from delaying sign-in. Authenticated responses are private and not cached publicly.
 
 `/demo` uses the same screens and domain functions with an explicit localStorage adapter. Sample data is opt-in. Demo persistence and backend persistence are separate test targets; the demo is neither a fallback for failed account writes nor a synchronization queue.
 
@@ -39,3 +39,7 @@ Client writes update displayed data only after successful persistence. Note auto
 Workspace sections share one client shell and its loaded data. Same-workspace navigation uses Next.js native History integration so pathname and search parameters update without fetching another server component payload. Browser back/forward remains supported. Initial loads, cross-boundary navigation, and every API operation retain server authentication checks; client navigation grants no data access. Note drafts can cancel section navigation while unsaved. Optional section bundles preload on navigation hover/focus.
 
 LifeHQ functions are configured for Vercel `bom1`, near the Supabase database in Mumbai (`ap-south-1`). This reduces geographic separation; hosted latency has not been benchmarked.
+
+Successful login performs one route replacement. The previous additional route refresh was removed. Workspace profile preferences load concurrently with record queries rather than after them. These changes remove redundant work; provider password verification and confirmation email delivery still take real time. No sub-second authentication guarantee is claimed.
+
+Both apps have independent appearance storage keys and share a nonsensitive theme component. CipherVault remains a development prototype: separate hosting does not add cloud synchronization or claim independent security review.

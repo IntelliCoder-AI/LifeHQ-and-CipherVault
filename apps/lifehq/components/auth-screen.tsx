@@ -1,4 +1,5 @@
 "use client";
+import { ThemeToggle } from "@lifehq/ui/theme";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -56,8 +57,7 @@ export function AuthScreen({
       if (!res.ok) throw new Error(result.error);
       if (mode === "reset" || result.confirm) setMessage(result.message);
       else {
-        router.push("/workspace");
-        router.refresh();
+        router.replace("/workspace");
       }
     } catch (e) {
       setError(
@@ -110,6 +110,9 @@ export function AuthScreen({
         </div>
       </section>
       <section className="auth-form-section">
+        <div className="auth-theme-toggle">
+          <ThemeToggle />
+        </div>
         <div className="auth-form">
           <span className="eyebrow">YOUR PERSONAL COMMAND CENTER</span>
           <h2>
@@ -210,7 +213,11 @@ export function AuthScreen({
             )}
             <Button type="submit" disabled={busy || !configured}>
               {busy
-                ? "One moment…"
+                ? mode === "signup"
+                  ? "Creating your account…"
+                  : mode === "login"
+                    ? "Signing in…"
+                    : "Saving…"
                 : mode === "signup"
                   ? "Create account"
                   : mode === "reset"

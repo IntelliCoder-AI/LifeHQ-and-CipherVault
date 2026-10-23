@@ -205,6 +205,27 @@ for (const width of [1440, 768, 390])
         nodes: v.nodes.map((n) => n.target),
       })),
     ).toEqual([]);
+    if (width === 1440) {
+      await page
+        .getByRole("switch", { name: "Dark theme", exact: true })
+        .click();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+      const darkScan = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(
+        darkScan.violations.map((v) => ({
+          id: v.id,
+          nodes: v.nodes.map((n) => ({
+            target: n.target,
+            summary: n.failureSummary,
+          })),
+        })),
+      ).toEqual([]);
+      await page
+        .getByRole("switch", { name: "Dark theme", exact: true })
+        .click();
+    }
     await page.getByLabel("Master passphrase", { exact: true }).fill(pass);
     await page
       .getByLabel("Confirm master passphrase", { exact: true })
@@ -266,13 +287,11 @@ test("another tab locks stale plaintext and malformed backups do not replace the
   await expect(
     page.getByRole("heading", { name: "Welcome back.", exact: true }),
   ).toBeVisible();
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "broken.json",
-      mimeType: "application/json",
-      buffer: Buffer.from('{"version":9000,"plaintext":"not a vault"}'),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "broken.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('{"version":9000,"plaintext":"not a vault"}'),
+  });
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.getByLabel("Master passphrase", { exact: true }).fill(pass);
   await page.getByRole("button", { name: "Unlock vault", exact: true }).click();

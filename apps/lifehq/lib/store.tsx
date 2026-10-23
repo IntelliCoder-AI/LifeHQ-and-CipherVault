@@ -1,4 +1,5 @@
 "use client";
+import { useTheme } from "@lifehq/ui/theme";
 import {
   createContext,
   useContext,
@@ -76,6 +77,7 @@ export function WorkspaceProvider({
   children: React.ReactNode;
   demo: boolean;
 }) {
+  const { setTheme } = useTheme();
   const [data, setData] = useState<Data>(emptyData),
     [preferences, setPref] = useState<Preferences>(defaults),
     [loading, setLoading] = useState(true),
@@ -135,30 +137,15 @@ export function WorkspaceProvider({
     void refresh();
   }, [refresh]);
   useEffect(() => {
-    const handler = () => {
-      void refresh();
+    const handler = (event: StorageEvent) => {
+      if (event.key === DEMO_KEY || event.key === null) void refresh();
     };
     if (demo) window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
   }, [demo, refresh]);
   useEffect(() => {
-    const theme =
-      preferences.theme === "system"
-        ? matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light"
-        : preferences.theme;
-    document.documentElement.dataset.theme = theme;
-    const media = matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => {
-      if (preferences.theme === "system")
-        document.documentElement.dataset.theme = media.matches
-          ? "dark"
-          : "light";
-    };
-    media.addEventListener("change", apply);
-    return () => media.removeEventListener("change", apply);
-  }, [preferences.theme]);
+    if (!loading) setTheme(preferences.theme);
+  }, [preferences.theme, loading, setTheme]);
   const save = useCallback(
     async <T extends Table>(
       table: T,

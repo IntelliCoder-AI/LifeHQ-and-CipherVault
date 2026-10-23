@@ -14,15 +14,15 @@ Updated 2026-10-23. **Implemented and deployed; the full goal remains blocked on
 
 | Check | Result |
 | --- | --- |
-| Vitest | **40 passed** across 4 files |
+| Vitest | **43 passed** across 5 files |
 | Strict TypeScript | Both apps passed |
 | ESLint | Passed |
 | Next.js optimized builds | Both apps passed; LifeHQ also built on Vercel |
-| Optimized Playwright suite | **22 passed** |
+| Optimized Playwright suite | **23 passed** |
 | Expanded light/dark Axe scan | All ten LifeHQ sections and task editor passed in both themes; signup also passed |
 | Responsive screenshots | Ten LifeHQ sections at 1440/768/390, vault setup/unlocked at all three widths; additional detailed captures |
 | Production dependency audit | Zero known vulnerabilities |
-| Supabase security advisors | No findings after both applied migrations |
+| Supabase security advisors | Database checks passed; latest Auth advisor notes leaked-password protection disabled |
 | Hosted login and demo | HTTP 200 through Vercel connector |
 | Hosted unauthenticated workspace API | HTTP 401 |
 | Hosted protected workspace | Resolved to login |
@@ -37,7 +37,7 @@ Screenshots in `docs/screenshots` are real browser captures with opt-in demo or 
 - LifeHQ: https://lifehq-radhe12.vercel.app — [local demo](https://lifehq-radhe12.vercel.app/demo), additional alias https://lifehq-three.vercel.app.
 - Supabase: **LifeHQ**, project `vcxxhpglhfkdxliwieao`, in **Anurag**, verified Free plan; both migrations applied. Existing unrelated app data untouched.
 - Vercel: **Radhe / radhe12**, verified Hobby. Source uploaded through Vercel's file API. The GitHub integration rejected repository linking; no automatic Git deployments are configured.
-- CipherVault: local development prototype on port 3001, no cloud deployment, no cloud data store, no account integration.
+- CipherVault: independent web-hosted development prototype, also available locally on port 3001. No cloud data store or account integration; encrypted vault contents remain in browser IndexedDB.
 
 ## Precise outstanding blockers
 
@@ -46,7 +46,7 @@ Screenshots in `docs/screenshots` are real browser captures with opt-in demo or 
 3. For future automatic deployments, authorize the Vercel GitHub integration for this repository and link it to the existing LifeHQ project. This does not block the current uploaded deployment.
 4. Local full Supabase Docker startup was blocked by access to the `public.ecr.aws` image registry. Migrations were applied to hosted Supabase through the connector, and RLS tests ran in PGlite; do not infer Auth-service testing from either result.
 
-CipherVault's required prototype workflows are implemented and tested. It remains explicitly unaudited and unsuitable for real credentials. Independent security review is required before real use; JavaScript cannot guarantee secure memory erasure and local storage can be lost. No public vault deployment was made.
+CipherVault's required prototype workflows are implemented and tested. It remains explicitly unaudited and unsuitable for real credentials. Independent security review is required before real use; JavaScript cannot guarantee secure memory erasure and local storage can be lost. The prototype interface is deployed separately; its encrypted data remains browser-local and no cloud synchronization was added.
 
 ## October 23 interface refinement
 
@@ -56,3 +56,10 @@ CipherVault's required prototype workflows are implemented and tested. It remain
 - Added an always-visible CipherVault entry and local startup guide; the vault remains a separate local prototype.
 - Eliminated server-component requests for same-workspace section changes; history and unsaved-note guards remain in place. Memoized reminder computation and preload optional screens on hover/focus.
 - Configured LifeHQ functions for Mumbai (`bom1`) near Supabase. No paid resources added. Hosted performance is not benchmarked.
+
+## Independent product and auth refinement
+
+- LifeHQ now uses neutral ivory/terracotta with a visible light/dark toggle on login and workspace, saved preferences, and system appearance support.
+- Public login/auth requests no longer do middleware session-refresh work. Successful login performs one navigation; protected-page identity checks use verified claims, and API routes retain fresh user checks. Profile loading now runs alongside workspace-record requests.
+- CipherVault has its own branding, geometric presentation, standalone product page, and separate Vercel project. The production launcher uses a verified HTTPS origin instead of localhost. Hosting serves the interface; vault records remain local-only.
+- Automatic review rejected removing Vercel SSO protection; that access setting was retained. No paid services or cloud vault storage were enabled.

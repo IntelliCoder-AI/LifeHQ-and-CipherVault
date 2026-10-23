@@ -1,8 +1,10 @@
 "use client";
 import Link from "next/link";
+import { ThemeToggle } from "@lifehq/ui/theme";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Shield,
+  Vault,
   LockKeyhole,
   UnlockKeyhole,
   Plus,
@@ -253,11 +255,12 @@ export function VaultApp() {
       <header className="vault-header">
         <Link className="vault-brand" href="/">
           <span>
-            <Shield size={22} />
+            <Vault size={24} />
           </span>
           CipherVault<span className="vault-brand-dot">.</span>
         </Link>
         <div className="row">
+          <ThemeToggle />
           <Badge tone={session ? "forest" : "neutral"}>
             {session ? <UnlockKeyhole size={12} /> : <LockKeyhole size={12} />}
             {session ? "Unlocked locally" : "Vault locked"}
@@ -297,11 +300,9 @@ export function VaultApp() {
               PRIVATE BY DESIGN. LOCAL BY DEFAULT.
             </span>
             <h1>
-              A quieter place
+              Your secrets.
               <br />
-              for your
-              <br />
-              <em>private things.</em>
+              <em>Your custody.</em>
             </h1>
             <p>
               A separate space, kept in this browser.

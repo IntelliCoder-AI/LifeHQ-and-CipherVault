@@ -478,8 +478,8 @@ export function SettingsPage() {
                   change("theme", e.target.value as Preferences["theme"])
                 }
               >
-                <option value="light">Warm ivory</option>
-                <option value="dark">Evening plum</option>
+                <option value="light">Natural ivory</option>
+                <option value="dark">Warm walnut</option>
                 <option value="system">Follow system</option>
               </select>
             </Field>

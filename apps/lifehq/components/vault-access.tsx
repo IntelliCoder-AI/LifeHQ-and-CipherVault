@@ -1,93 +1,129 @@
 "use client";
+import Link from "next/link";
 import {
-  ShieldCheck,
+  Vault,
   ArrowUpRight,
+  ArrowLeft,
   KeyRound,
   Database,
-  LockKeyhole,
+  Fingerprint,
 } from "lucide-react";
+import { ThemeToggle } from "@lifehq/ui/theme";
 import { Button } from "@lifehq/ui";
-
 export function VaultAccess() {
+  const address = process.env.NEXT_PUBLIC_VAULT_URL;
+  const launchable = Boolean(
+    address &&
+    /^https:\/\//.test(address) &&
+    !/^https:\/\/(localhost|127\.)/.test(address),
+  );
   return (
-    <div className="vault-access stack">
-      <div className="page-heading">
-        <div>
-          <span className="eyebrow">CIPHERVAULT · LOCAL PROTOTYPE</span>
-          <h1>A private place for your test secrets.</h1>
-          <p>
-            CipherVault is a separate application that keeps its encrypted vault
-            in your browser on this device.
-          </p>
+    <div className="cipher-product">
+      <header className="cipher-product-header">
+        <Link href="/ciphervault" className="cipher-wordmark">
+          <span>
+            <Vault size={26} />
+          </span>
+          CIPHER<span className="cipher-wordmark-light">VAULT</span>
+        </Link>
+        <div className="row">
+          <Link className="cipher-back" href="/demo">
+            <ArrowLeft size={16} /> LifeHQ
+          </Link>
+          <ThemeToggle />
         </div>
-      </div>
-      <section className="paper-panel vault-introduction">
-        <span className="empty-symbol">
-          <ShieldCheck size={28} />
-        </span>
-        <h2>Separate from your LifeHQ workspace.</h2>
-        <p>
-          The hosted LifeHQ app does not include the vault’s unlock screen.
-          Start CipherVault from your copy of the source, then open its separate
-          local address.
-        </p>
-        <div className="vault-start-command">
-          <span className="eyebrow">FROM THE REPOSITORY ROOT</span>
-          <code>npm run dev:vault</code>
+      </header>
+      <main id="main" className="cipher-product-main">
+        <div className="cipher-product-kicker">
+          <span /> INDEPENDENT APP · ON-DEVICE STORAGE
         </div>
-        <Button asChild>
+        <div className="cipher-product-hero">
+          <div>
+            <span className="cipher-edition">CIPHERVAULT / 01</span>
+            <h1>
+              Your secrets.
+              <br />
+              <em>Your custody.</em>
+            </h1>
+            <p>
+              A dedicated home for credentials and private notes, with its own
+              identity, master passphrase, and encrypted local storage.
+            </p>
+            {launchable ? (
+              <Button asChild>
+                <a href={address} target="_blank" rel="noopener noreferrer">
+                  Open CipherVault <ArrowUpRight size={18} />
+                </a>
+              </Button>
+            ) : (
+              <div className="cipher-unavailable" role="status">
+                The web app is being connected. No local server is required once
+                its web address is available.
+              </div>
+            )}
+            <span className="cipher-launch-note">
+              Separate from LifeHQ sign-in. Opens as its own application.
+            </span>
+          </div>
+          <div className="cipher-emblem" aria-hidden="true">
+            <span className="cipher-emblem-ring" />
+            <span className="cipher-emblem-ring" />
+            <span className="cipher-emblem-core">
+              <Vault size={76} strokeWidth={1.1} />
+            </span>
+            <span className="cipher-emblem-label">
+              ENCRYPTED ON THIS DEVICE
+            </span>
+          </div>
+        </div>
+        <div className="cipher-feature-grid">
+          {[
+            {
+              icon: KeyRound,
+              number: "01",
+              title: "One independent key",
+              text: "A master passphrase unlocks the vault. It is separate from your LifeHQ password.",
+            },
+            {
+              icon: Database,
+              number: "02",
+              title: "Your browser is the home",
+              text: "Encrypted records stay on this browser and device. Export encrypted backups to keep a second copy.",
+            },
+            {
+              icon: Fingerprint,
+              number: "03",
+              title: "A focused workspace",
+              text: "Credentials, secure notes, password generation, and automatic locking in a dedicated app.",
+            },
+          ].map((item) => (
+            <section key={item.number}>
+              <div className="between">
+                <item.icon size={22} />
+                <span>{item.number}</span>
+              </div>
+              <h2>{item.title}</h2>
+              <p>{item.text}</p>
+            </section>
+          ))}
+        </div>
+        <aside className="cipher-prototype">
+          <strong>Development prototype · dummy credentials only.</strong>{" "}
+          CipherVault has not been independently audited and is unsuitable for
+          real credentials until expert review. There is no passphrase recovery.
+          Your vault does not sync across devices.
+        </aside>
+        <footer className="cipher-product-footer">
+          <span>CIPHERVAULT — AN INDEPENDENT COMPANION TO LIFEHQ</span>
           <a
-            href={process.env.NEXT_PUBLIC_VAULT_URL || "http://localhost:3001"}
+            href="https://github.com/IntelliCoder-AI/LifeHQ-and-CipherVault#run-locally"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Open local CipherVault <ArrowUpRight size={18} />
+            Source & local setup <ArrowUpRight size={14} />
           </a>
-        </Button>
-        <p className="subtle">
-          Start the command first. The local app opens at localhost:3001 on your
-          own computer.
-        </p>
-      </section>
-      <div className="vault-capabilities">
-        {[
-          {
-            icon: KeyRound,
-            title: "Credentials & secure notes",
-            text: "Organize dummy accounts, generate passwords, and find your local items.",
-          },
-          {
-            icon: Database,
-            title: "Encrypted local backups",
-            text: "Export and restore encrypted backups. Nothing syncs to your LifeHQ account.",
-          },
-          {
-            icon: LockKeyhole,
-            title: "An independent lock",
-            text: "Your master passphrase and encryption key stay separate from LifeHQ sign-in.",
-          },
-        ].map((item) => (
-          <section key={item.title}>
-            <item.icon size={23} />
-            <h3>{item.title}</h3>
-            <p>{item.text}</p>
-          </section>
-        ))}
-      </div>
-      <div className="warning">
-        <strong>Development prototype — dummy credentials only.</strong>{" "}
-        CipherVault has not been independently audited and is unsuitable for
-        real credentials until expert review. There is no passphrase recovery;
-        keep an encrypted backup.
-      </div>
-      <a
-        className="text-link"
-        href="https://github.com/IntelliCoder-AI/LifeHQ-and-CipherVault#run-locally"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Source and local setup instructions <ArrowUpRight size={16} />
-      </a>
+        </footer>
+      </main>
     </div>
   );
 }

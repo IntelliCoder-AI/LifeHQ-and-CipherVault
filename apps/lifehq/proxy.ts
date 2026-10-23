@@ -12,7 +12,8 @@ export async function proxy(request: NextRequest) {
   if (
     supabaseUrl &&
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY &&
-    !request.nextUrl.pathname.startsWith("/demo")
+    (request.nextUrl.pathname === "/workspace" ||
+      request.nextUrl.pathname.startsWith("/workspace/"))
   ) {
     const db = createServerClient(
       supabaseUrl,
