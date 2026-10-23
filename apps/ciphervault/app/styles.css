@@ -13,17 +13,20 @@
   --sidebar: #ece4d6;
 }
 [data-theme="dark"] {
-  --paper: #44382c;
-  --surface: #514333;
-  --ink: #fff0d8;
-  --muted: #e3cdb0;
-  --accent-primary: #f0c37d;
-  --accent-soft: #624932;
-  --stone: #69553f;
-  --line: #967a5b;
-  --copper: #f5d092;
-  --copper-soft: #725535;
-  --sidebar: #3f3429;
+  --paper: #48403b;
+  --surface: #584e47;
+  --ink: #f3eee8;
+  --muted: #d8cfc4;
+  --accent-primary: #dcc4a5;
+  --accent-soft: #5e4c3c;
+  --stone: #63564c;
+  --line: #807064;
+  --control-line: #b6a699;
+  --copper: #d4bda1;
+  --copper-soft: #5c4a3a;
+  --danger: #f2bfc2;
+  --danger-soft: #643e49;
+  --sidebar: #403a35;
 }
 .vault-app {
   min-height: 100vh;
@@ -944,4 +947,27 @@
 /* Theme changes must not blend a light button into a dark label. */
 .vault-app .button {
   transition: transform 0.15s;
+}
+
+[data-theme="dark"] .prototype-banner {
+  background: var(--paper);
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+[data-theme="dark"] .prototype-banner strong {
+  color: var(--ink);
+}
+[data-theme="dark"] .vault-nav.active {
+  color: var(--ink);
+  background: var(--stone);
+  box-shadow: inset 3px 0 var(--accent-primary);
+}
+[data-theme="dark"] .vault-item.selected {
+  border-color: var(--control-line);
+}
+[data-theme="dark"] .secret-field .eyebrow {
+  color: var(--muted);
+}
+[data-theme="dark"] .vault-header {
+  box-shadow: 0 3px 18px #332a241a;
 }

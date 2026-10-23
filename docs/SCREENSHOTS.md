@@ -26,3 +26,11 @@ Additional detail captures:
 - [Login](screenshots/login-1440.png) · [Mobile](screenshots/login-390.png)
 - [Signup](screenshots/signup-1440.png) · [Mobile](screenshots/signup-390.png)
 - [Dark overview](screenshots/overview-dark-1440.png)
+
+Dark-mode detail review (sample/dummy records only):
+
+- [Empty Overview](screenshots/overview-empty-dark-1440.png) · [Mobile](screenshots/overview-empty-dark-390.png)
+- [Populated Overview](screenshots/overview-dark-1440.png) · [Tablet](screenshots/overview-dark-768.png) · [Mobile](screenshots/overview-dark-390.png)
+- [Vault setup](screenshots/vault-setup-dark-1440.png)
+- [Vault selected record](screenshots/vault-detail-dark-1440.png) · [Tablet](screenshots/vault-detail-dark-768.png) · [Mobile](screenshots/vault-detail-dark-390.png)
+- [Vault editor](screenshots/vault-editor-dark-1440.png) · [Mobile](screenshots/vault-editor-dark-390.png)

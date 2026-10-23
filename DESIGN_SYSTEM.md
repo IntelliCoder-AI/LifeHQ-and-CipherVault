@@ -8,15 +8,15 @@ Tokens live in `packages/ui/styles.css`. DM Sans is the readable interface face;
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Paper | `#faf8f4` | `#493b30` |
-| Surface | `#fffefa` | `#55463a` |
-| Ink | `#514237` | `#fff5e7` |
-| Muted text | `#726354` | `#e5d3bf` |
-| Primary accent | `#9b4935` | `#f4c3a0` |
-| Stone | `#eee8df` | `#685244` |
-| Brass accent | `#805e25` | `#f2d29b` |
+| Paper | `#faf8f4` | `#493f46` |
+| Surface | `#fffefa` | `#594c55` |
+| Ink | `#514237` | `#f4eef1` |
+| Muted text | `#726354` | `#d9cdd4` |
+| Primary accent | `#9b4935` | `#eac2b3` |
+| Stone | `#eee8df` | `#63525c` |
+| Brass accent | `#805e25` | `#d8c2a6` |
 
-LifeHQ uses neutral ivory surfaces, warm brown text, and restrained terracotta accents. Navigation uses a subtle active background and a thin accent rule. Warm walnut is the evening theme. The header toggle changes light/dark appearance immediately; Settings also supports system appearance. A nonce-authorized bootstrap applies saved appearance before first paint. Account preferences sync the workspace theme; the login page retains a nonsensitive device preference.
+LifeHQ uses neutral ivory surfaces, warm brown text, and restrained terracotta accents. Navigation uses a subtle active background and a thin accent rule. Soft dusk is the evening theme. The header toggle changes light/dark appearance immediately; Settings also supports system appearance. A nonce-authorized bootstrap applies saved appearance before first paint. Account preferences sync the workspace theme; the login page retains a nonsensitive device preference.
 
 CipherVault owns separate sandstone/ochre tokens, geometric branding, sans-serif headings, and a standalone lock screen. LifeHQ links to a standalone product page that launches the independent web origin. No vault unlock screen, keys, or encrypted records live in LifeHQ.
 
@@ -35,3 +35,9 @@ Focus uses a visible accent outline. Motion is short and limited to state transi
 ## Visual evidence
 
 `docs/screenshots/` contains browser captures at 1440, 768, and 390 pixels for all ten LifeHQ sections (including the CipherVault access guide) and vault setup/unlocked layouts. These use clearly labeled sample records or dummy vault data. Automated overflow and selected accessibility checks accompany the screenshots. Visual inspection and accessibility results are recorded in [TESTING.md](TESTING.md); neither screenshots nor automated scans alone establish complete accessibility compliance.
+
+## Dark-mode refinement
+
+Dark mode uses desaturated dusk surfaces and off-white text in LifeHQ, with muted stone/champagne tones in CipherVault. Decorative dividers stay quiet; form inputs and secondary actions have a separate higher-contrast control border. Toasts use raised dark surfaces, and the vault prototype notice uses neutral text instead of a large amber band. Light-mode tokens are unchanged.
+
+Visual verification includes empty and populated Overview screens, the vault setup, a selected dummy record, and the edit dialog at desktop and mobile sizes. The vault palette remains distinct from LifeHQ.

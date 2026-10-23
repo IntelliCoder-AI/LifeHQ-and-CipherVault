@@ -27,20 +27,21 @@
   color-scheme: light;
 }
 [data-theme="dark"] {
-  --paper: #493b30;
-  --surface: #55463a;
-  --ink: #fff5e7;
-  --muted: #e5d3bf;
-  --accent-primary: #f4c3a0;
-  --accent-soft: #6c4d3d;
-  --stone: #685244;
-  --line: #9a8069;
-  --copper: #f2d29b;
-  --copper-soft: #715738;
-  --danger: #ffd2cd;
-  --danger-soft: #76444e;
-  --sidebar: #42362c;
-  --shadow: 0 20px 80px #4c302b44;
+  --paper: #493f46;
+  --surface: #594c55;
+  --ink: #f4eef1;
+  --muted: #d9cdd4;
+  --accent-primary: #eac2b3;
+  --accent-soft: #5d454f;
+  --stone: #63525c;
+  --line: #7a6572;
+  --control-line: #b8a4b0;
+  --copper: #d8c2a6;
+  --copper-soft: #5f4c40;
+  --danger: #f2bfc2;
+  --danger-soft: #643e49;
+  --sidebar: #40363e;
+  --shadow: 0 18px 54px #33262e33;
   color-scheme: dark;
 }
 * {
@@ -166,7 +167,7 @@ textarea {
   color: var(--surface);
 }
 [data-theme="dark"] .button-primary {
-  color: #493b30;
+  color: var(--paper);
 }
 .button-secondary {
   border-color: var(--line);
@@ -637,4 +638,44 @@ textarea {
   .theme-toggle-track {
     display: none;
   }
+}
+
+/* Quiet dividers and higher-contrast controls have distinct jobs in dark mode. */
+[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  border-color: var(--control-line);
+}
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+[data-theme="dark"] .button {
+  transition: transform 0.15s;
+}
+[data-theme="dark"] .button-secondary {
+  color: var(--ink);
+  border-color: var(--control-line);
+}
+[data-theme="dark"] .theme-toggle {
+  border-color: var(--control-line);
+}
+[data-theme="dark"] .button-danger {
+  color: var(--paper);
+}
+
+[data-theme="dark"] .toast {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--control-line);
+  box-shadow: var(--shadow);
+}
+
+[data-theme="dark"] input[type="range"],
+[data-theme="dark"] input[type="radio"] {
+  accent-color: var(--accent-primary);
+}
+[data-theme="dark"] .modal-overlay {
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
 }

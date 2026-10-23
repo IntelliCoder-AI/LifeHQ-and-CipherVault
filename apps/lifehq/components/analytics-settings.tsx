@@ -479,7 +479,7 @@ export function SettingsPage() {
                 }
               >
                 <option value="light">Natural ivory</option>
-                <option value="dark">Warm walnut</option>
+                <option value="dark">Soft dusk</option>
                 <option value="system">Follow system</option>
               </select>
             </Field>

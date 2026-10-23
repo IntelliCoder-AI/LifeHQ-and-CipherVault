@@ -1031,7 +1031,11 @@ function EntryEditor({
                     </Button>
                   </div>
                 </Field>
-                <div className="strength-indicator" aria-label={score.label}>
+                <div
+                  className="strength-indicator"
+                  role="img"
+                  aria-label={`Password strength: ${score.label}`}
+                >
                   {[1, 2, 3, 4].map((v) => (
                     <span
                       key={v}

@@ -65,3 +65,7 @@ CipherVault's required prototype workflows are implemented and tested. It remain
 - Automatic review rejected removing Vercel SSO protection; that access setting was retained. No paid services or cloud vault storage were enabled.
 
 CipherVault interface: https://ciphervault-radhe12.vercel.app — a separate browser-local prototype. The production root returned HTTP 200 through the Vercel connector, with its restrictive CSP and prototype label. This does not establish an independent crypto audit or complete hosted browser verification.
+
+## Dark-mode visual refinement
+
+Dark-only tokens and overrides reduce the brown/yellow cast, separate header/sidebar/panel surfaces, soften decorative borders, and improve control and placeholder visibility. CipherVault's warning banner and active navigation use restrained tones. Light-mode tokens and layout are unchanged. Optimized builds and ESLint passed; six focused existing browser theme/accessibility checks passed, plus contrast/overflow checks across 11 additional dark captures using dummy records. The selected vault record and editor passed at desktop, tablet, and/or mobile sizes. The password-strength graphic also received a valid accessible image role. No authentication, storage, cryptographic, or data-access behavior changed.
