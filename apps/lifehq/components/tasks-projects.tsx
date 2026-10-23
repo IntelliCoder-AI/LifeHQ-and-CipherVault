@@ -1,6 +1,7 @@
 "use client";
+import { useWorkspaceRouter } from "@/lib/navigation";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import {
   Plus,
   Search,
@@ -492,7 +493,7 @@ export function ProjectsPage({
   id?: string | null;
 }) {
   const { data, demo, update, toast, save } = useWorkspace();
-  const router = useRouter();
+  const router = useWorkspaceRouter();
   const [query, setQuery] = useState(""),
     [filter, setFilter] = useState("active"),
     [milestone, setMilestone] = useState("");

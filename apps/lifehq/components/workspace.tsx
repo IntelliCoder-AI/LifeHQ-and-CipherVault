@@ -1,8 +1,9 @@
 "use client";
-import { Suspense, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { useWorkspaceRouter } from "@/lib/navigation";
+import { Suspense, useEffect, useRef, useState, useMemo } from "react";
+import { WorkspaceLink as Link } from "@/lib/navigation";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   Layers3,
   LayoutDashboard,
@@ -58,6 +59,18 @@ const AnalyticsPage = dynamic(() =>
 const SettingsPage = dynamic(() =>
   import("./analytics-settings").then((m) => m.SettingsPage),
 );
+const VaultAccess = dynamic(() =>
+  import("./vault-access").then((m) => m.VaultAccess),
+);
+const sectionLoaders: Record<string, () => Promise<unknown>> = {
+  planner: () => import("./calendar"),
+  goals: () => import("./goals-habits"),
+  habits: () => import("./goals-habits"),
+  notes: () => import("./notes"),
+  review: () => import("./analytics-settings"),
+  settings: () => import("./analytics-settings"),
+  ciphervault: () => import("./vault-access"),
+};
 const navigation = [
   { id: "", label: "Overview", icon: LayoutDashboard },
   { id: "planner", label: "Daily planner", icon: CalendarDays },
@@ -125,7 +138,7 @@ function Shell() {
     message,
   } = useWorkspace();
   const pathname = usePathname(),
-    router = useRouter(),
+    router = useWorkspaceRouter(),
     params = useSearchParams();
   const section = pathname.split("/")[2] || "",
     base = demo ? "/demo" : "/workspace";
@@ -157,22 +170,28 @@ function Shell() {
     return () => clearInterval(timer);
   }, []);
   const date = today(preferences.timezone);
-  const upcoming = preferences.reminders
-    ? schedule(data, date, addDays(date, 7))
-        .filter((i) => i.status !== "done" && i.kind !== "project")
-        .filter((i) => {
-          const source =
-            i.kind === "task"
-              ? data.tasks.find((t) => t.id === i.id)
-              : data.events.find((e) => e.id === i.id);
-          if (source?.reminder_minutes == null || !i.time) return false;
-          const time = Date.parse(scheduleInstant(i.date, i.time, i.timezone));
-          return (
-            time >= now - 15 * 60000 &&
-            time - source.reminder_minutes * 60000 <= now
-          );
-        })
-    : [];
+  const upcoming = useMemo(
+    () =>
+      preferences.reminders
+        ? schedule(data, date, addDays(date, 7))
+            .filter((i) => i.status !== "done" && i.kind !== "project")
+            .filter((i) => {
+              const source =
+                i.kind === "task"
+                  ? data.tasks.find((t) => t.id === i.id)
+                  : data.events.find((e) => e.id === i.id);
+              if (source?.reminder_minutes == null || !i.time) return false;
+              const time = Date.parse(
+                scheduleInstant(i.date, i.time, i.timezone),
+              );
+              return (
+                time >= now - 15 * 60000 &&
+                time - source.reminder_minutes * 60000 <= now
+              );
+            })
+        : [],
+    [data, date, now, preferences.reminders],
+  );
   async function logout() {
     if (demo) {
       router.push("/login");
@@ -230,6 +249,12 @@ function Shell() {
             className={`nav-link ${section === n.id ? "active" : ""}`}
             aria-current={section === n.id ? "page" : undefined}
             onClick={() => setMobile(false)}
+            onMouseEnter={() => {
+              void sectionLoaders[n.id]?.().catch(() => {});
+            }}
+            onFocus={() => {
+              void sectionLoaders[n.id]?.().catch(() => {});
+            }}
           >
             <n.icon size={18} />
             <span>{n.label}</span>
@@ -247,21 +272,19 @@ function Shell() {
         ))}
       </nav>
       <div className="sidebar-bottom">
-        {process.env.NEXT_PUBLIC_VAULT_URL && (
-          <a
-            className="vault-link"
-            href={process.env.NEXT_PUBLIC_VAULT_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <ShieldCheck size={18} />
-            <div>
-              <strong>CipherVault</strong>
-              <small>Local prototype · demo secrets only</small>
-            </div>
-            <ArrowUpRight size={14} />
-          </a>
-        )}
+        <Link
+          className="vault-link"
+          href={`${base}/ciphervault`}
+          aria-current={section === "ciphervault" ? "page" : undefined}
+          onClick={() => setMobile(false)}
+        >
+          <ShieldCheck size={18} />
+          <div>
+            <strong>CipherVault</strong>
+            <small>Local encrypted vault</small>
+          </div>
+          <ArrowUpRight size={14} />
+        </Link>
         <Link
           className={`nav-link ${section === "settings" ? "active" : ""}`}
           href={`${base}/settings`}
@@ -301,7 +324,8 @@ function Shell() {
             <span className="topbar-breadcrumb">
               My space<span>/</span>
               <strong>
-                {navigation.find((n) => n.id === section)?.label || "Settings"}
+                {navigation.find((n) => n.id === section)?.label ||
+                  (section === "ciphervault" ? "CipherVault" : "Settings")}
               </strong>
             </span>
           </div>
@@ -431,6 +455,8 @@ function Shell() {
                 <AnalyticsPage remove={remove} />
               ) : section === "settings" ? (
                 <SettingsPage />
+              ) : section === "ciphervault" ? (
+                <VaultAccess />
               ) : (
                 <Empty
                   title="This page has moved."
@@ -548,7 +574,7 @@ function CommandPalette({
   edit: OpenEditor;
 }) {
   const { data, demo } = useWorkspace();
-  const router = useRouter();
+  const router = useWorkspaceRouter();
   const [query, setQuery] = useState(""),
     [index, setIndex] = useState(0);
   const base = demo ? "/demo" : "/workspace",

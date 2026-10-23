@@ -1,6 +1,7 @@
 "use client";
+import { useWorkspaceRouter } from "@/lib/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -30,7 +31,7 @@ export function NotesPage({
   remove: RemoveRequest;
 }) {
   const { data, demo, save, toast } = useWorkspace();
-  const router = useRouter(),
+  const router = useWorkspaceRouter(),
     params = useSearchParams(),
     selected = data.notes.find((n) => n.id === params.get("id"));
   const [query, setQuery] = useState(""),
@@ -261,13 +262,21 @@ function NoteEditor({
         void flushRef.current();
       }
     };
+    const routeChange = (event: Event) => {
+      if (JSON.stringify(latest.current) !== saved.current) {
+        event.preventDefault();
+        toast("Let this note finish saving before leaving.");
+      }
+    };
     window.addEventListener("beforeunload", unload);
     document.addEventListener("click", navigation, true);
     window.addEventListener("keydown", shortcut);
+    window.addEventListener("lifehq:navigate", routeChange);
     return () => {
       window.removeEventListener("beforeunload", unload);
       document.removeEventListener("click", navigation, true);
       window.removeEventListener("keydown", shortcut);
+      window.removeEventListener("lifehq:navigate", routeChange);
     };
   }, [toast]);
   function change(patch: Partial<typeof draft>) {

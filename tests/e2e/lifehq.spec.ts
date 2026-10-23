@@ -339,6 +339,7 @@ for (const width of [1440, 768, 390])
       "notes",
       "review",
       "settings",
+      "ciphervault",
     ]) {
       await page.goto(`/demo/${section}`);
       await expect(page.locator(".loading")).toHaveCount(0);
@@ -474,6 +475,7 @@ test("major screens and the editor meet automated accessibility checks in both t
       "notes",
       "review",
       "settings",
+      "ciphervault",
     ]) {
       await page.goto(`/demo/${section}`);
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
@@ -507,4 +509,203 @@ test("major screens and the editor meet automated accessibility checks in both t
       nodes: v.nodes.map((n) => n.target),
     })),
   ).toEqual([]);
+});
+
+test("signup confirms passwords, toggles visibility, and rejects mismatches before submission", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/login");
+  await page
+    .getByRole("button", { name: "Create an account", exact: false })
+    .click();
+  await page.evaluate(() => document.fonts.ready);
+  const accessibility = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(
+    accessibility.violations.map((v) => ({
+      id: v.id,
+      nodes: v.nodes.map((n) => ({
+        target: n.target,
+        summary: n.failureSummary,
+      })),
+    })),
+  ).toEqual([]);
+  await page.getByLabel("Your name").fill("Test reader");
+  await page.getByLabel("Email address").fill("dummy@example.test");
+  await page
+    .getByLabel("Password", { exact: true })
+    .fill("a dummy password for a form test");
+  await page
+    .getByLabel("Confirm password", { exact: true })
+    .fill("a different dummy password");
+  await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute(
+    "type",
+    "password",
+  );
+  await page
+    .getByRole("checkbox", { name: "Show passwords", exact: true })
+    .check();
+  await expect(page.getByLabel("Password", { exact: true })).toHaveAttribute(
+    "type",
+    "text",
+  );
+  await expect(
+    page.getByLabel("Confirm password", { exact: true }),
+  ).toHaveAttribute("type", "text");
+  await page
+    .getByRole("checkbox", { name: "Show passwords", exact: true })
+    .uncheck();
+  await expect(
+    page.getByLabel("Confirm password", { exact: true }),
+  ).toHaveAttribute("type", "password");
+  let attempts = 0;
+  await page.route("**/api/auth", async (route) => {
+    attempts++;
+    expect(route.request().postDataJSON().confirmPassword).toBe(
+      "a dummy password for a form test",
+    );
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        ok: true,
+        confirm: true,
+        message: "Check your inbox to confirm your account.",
+      }),
+    });
+  });
+  await page
+    .getByRole("button", { name: "Create account", exact: true })
+    .click();
+  await expect(page.locator(".error[role=alert]")).toContainText(
+    "Passwords do not match",
+  );
+  expect(attempts).toBe(0);
+  await page
+    .getByLabel("Confirm password", { exact: true })
+    .fill("a dummy password for a form test");
+  await page
+    .getByRole("button", { name: "Create account", exact: true })
+    .click();
+  await expect(page.locator(".notice[role=status]")).toContainText(
+    "Check your inbox",
+  );
+  expect(attempts).toBe(1);
+  const res = await request.post("/api/auth", {
+    headers: { Origin: process.env.LIFEHQ_BASE_URL || "http://localhost:3000" },
+    data: {
+      action: "signup",
+      email: "dummy@example.test",
+      password: "a dummy password for a form test",
+      confirmPassword: "different enough",
+    },
+  });
+  expect(res.status()).toBe(400);
+  expect((await res.json()).error).toContain("Passwords do not match");
+});
+
+test("workspace sections navigate without server roundtrips and browser history remains usable", async ({
+  page,
+}) => {
+  await page.goto("/demo");
+  await page
+    .getByRole("button", { name: "Explore sample workspace", exact: true })
+    .click();
+  await expect(
+    page.getByText("A space to create", { exact: true }).last(),
+  ).toBeVisible();
+  const roundtrips: string[] = [];
+  page.on("request", (r) => {
+    if (r.headers().rsc === "1" || r.url().includes("/api/workspace"))
+      roundtrips.push(r.url());
+  });
+  for (const [label, title] of [
+    ["Projects", "Good things take shape."],
+    ["Tasks", "A little more focus."],
+    ["Habits", "The art of showing up."],
+  ]) {
+    await page
+      .locator(".sidebar nav")
+      .getByRole("link", { name: label, exact: false })
+      .click();
+    await expect(
+      page.getByRole("heading", { name: title, exact: true }),
+    ).toBeVisible();
+  }
+  await page.goBack();
+  await expect(
+    page.getByRole("heading", { name: "A little more focus.", exact: true }),
+  ).toBeVisible();
+  await page.goForward();
+  await expect(
+    page.getByRole("heading", { name: "The art of showing up.", exact: true }),
+  ).toBeVisible();
+  expect(roundtrips).toEqual([]);
+});
+
+test("Overview customization moves and hides its sections, and CipherVault is always discoverable", async ({
+  page,
+}) => {
+  await page.goto("/demo");
+  await page
+    .getByRole("button", { name: "Explore sample workspace", exact: true })
+    .click();
+  await page
+    .locator(".sidebar")
+    .getByRole("link", { name: "Settings", exact: false })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Customize Overview", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Move notes up", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Move notes down", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Move notes up", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Move notes up", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Move notes up", exact: true })
+    .click();
+  await page.getByRole("checkbox", { name: "Goals", exact: true }).uncheck();
+  await page
+    .getByRole("button", { name: "Save preferences", exact: true })
+    .click();
+  await page
+    .locator(".sidebar nav")
+    .getByRole("link", { name: "Overview", exact: false })
+    .click();
+  const titles = await page
+    .locator(".dashboard-grid > section > .section-heading h2")
+    .allTextContents();
+  expect(titles).not.toContain("A little closer");
+  expect(titles.indexOf("From your notebook")).toBeLessThan(
+    titles.indexOf("Your daily rituals"),
+  );
+  await page
+    .locator(".sidebar")
+    .getByRole("link", { name: "CipherVault", exact: false })
+    .click();
+  await expect(
+    page.getByRole("heading", {
+      name: "A private place for your test secrets.",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Open local CipherVault", exact: false }),
+  ).toHaveAttribute("target", "_blank");
+  await expect(
+    page.getByText("npm run dev:vault", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".warning")).toContainText(
+    "dummy credentials only",
+  );
 });

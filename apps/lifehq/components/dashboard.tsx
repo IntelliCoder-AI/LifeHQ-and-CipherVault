@@ -1,5 +1,6 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useWorkspaceRouter } from "@/lib/navigation";
+
 import { Temporal } from "@js-temporal/polyfill";
 import {
   ArrowUpRight,
@@ -54,7 +55,7 @@ export function Dashboard({ edit }: { edit: OpenEditor }) {
     toast,
     loadSamples,
   } = useWorkspace();
-  const router = useRouter();
+  const router = useWorkspaceRouter();
   const date = today(preferences.timezone),
     base = demo ? "/demo" : "/workspace";
   const daily = schedule(data, date, date),

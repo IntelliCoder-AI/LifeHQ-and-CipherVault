@@ -8,15 +8,17 @@ Tokens live in `packages/ui/styles.css`. DM Sans is the readable interface face;
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Paper | `#f6f4ee` | `#171f1d` |
-| Surface | `#fffefb` | `#1d2925` |
-| Ink | `#202a27` | `#f0efe5` |
-| Muted text | `#56635b` | `#adbab0` |
-| Forest | `#365b50` | `#a7c7b0` |
-| Stone | `#e9e5dd` | `#29352f` |
-| Copper text/accent | `#854b2f` | `#e0b08e` |
+| Paper | `#faf7f2` | `#49324a` |
+| Surface | `#fffdf9` | `#563c53` |
+| Ink | `#563b4b` | `#fff4e7` |
+| Muted text | `#755f6c` | `#e5cedb` |
+| Primary accent | `#80506b` | `#f2d6b3` |
+| Stone | `#eee4e5` | `#65495f` |
+| Brass accent | `#866030` | `#efd2a9` |
 
-Copper was darkened from the specification's inspiration color to improve small-text contrast. Sage text has a separate dark-theme value. Completed calendar items use solid readable text and strikethrough, not faded opacity. Themes are purposefully composed, not inverted.
+Warm ivory, rosewood, plum, and brass replace the green palette. The evening theme uses visibly plum surfaces. Existing project color IDs remain compatible with saved records, while their displayed labels and colors use the new palette. Small-text accents meet the automated contrast checks; completed calendar items use solid readable text and strikethrough. Themes are purposefully composed, not inverted.
+
+Interface text is generally 16–18px, secondary labels 14–15px, and editorial panel headings 31px. Mobile layouts reflow around the larger type. Fonts remain locally bundled.
 
 ## Components and behavior
 
@@ -24,10 +26,10 @@ Copper was darkened from the specification's inspiration color to improve small-
 
 Destructive record actions use explicit confirmation. Account deletion additionally requires a password and typed phrase. Vault backup replacement requires authentication and acknowledgement. Save states distinguish pending, saved, and failed; note drafts remain editable after failures.
 
-Desktop uses a 238px sidebar and a generous content canvas. Tablet reduces density and stacks panels. Mobile uses a navigation dialog, stacked dashboard sections, reflowed task controls, and single-column note/vault detail views. Calendar week/month grids have compact entries with an editable alternative; the day view is preferable for detailed mobile planning. No interaction depends solely on hover or drag.
+Desktop uses a 260px scrollable sidebar and a generous content canvas. Tablet reduces density and stacks panels. Mobile uses a navigation dialog, stacked dashboard sections, reflowed task controls, and single-column note/vault detail views. Calendar week/month grids have compact entries with an editable alternative; the day view is preferable for detailed mobile planning. No interaction depends solely on hover or drag.
 
 Focus uses a visible accent outline. Motion is short and limited to state transitions; reduced-motion preferences disable it. Charts avoid entry animations and expose a data table. Informational status is conveyed with text as well as color.
 
 ## Visual evidence
 
-`docs/screenshots/` contains browser captures at 1440, 768, and 390 pixels for all nine LifeHQ sections and vault setup/unlocked layouts. These use clearly labeled sample records or dummy vault data. Automated overflow and selected accessibility checks accompany the screenshots. Visual inspection and accessibility results are recorded in [TESTING.md](TESTING.md); neither screenshots nor automated scans alone establish complete accessibility compliance.
+`docs/screenshots/` contains browser captures at 1440, 768, and 390 pixels for all ten LifeHQ sections (including the CipherVault access guide) and vault setup/unlocked layouts. These use clearly labeled sample records or dummy vault data. Automated overflow and selected accessibility checks accompany the screenshots. Visual inspection and accessibility results are recorded in [TESTING.md](TESTING.md); neither screenshots nor automated scans alone establish complete accessibility compliance.

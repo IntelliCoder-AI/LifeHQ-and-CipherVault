@@ -21,15 +21,25 @@ export function AuthScreen({
   const [mode, setMode] = useState(reset ? "update" : "login"),
     [error, setError] = useState(""),
     [message, setMessage] = useState(""),
-    [busy, setBusy] = useState(false);
+    [busy, setBusy] = useState(false),
+    [showPasswords, setShowPasswords] = useState(false);
   const router = useRouter(),
     params = useSearchParams();
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
     setMessage("");
-    setBusy(true);
     const fd = new FormData(e.currentTarget);
+    if (
+      (mode === "signup" || mode === "update") &&
+      fd.get("password") !== fd.get("confirmPassword")
+    ) {
+      setError(
+        "Passwords do not match. Please enter the same password in both fields.",
+      );
+      return;
+    }
+    setBusy(true);
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
@@ -38,6 +48,7 @@ export function AuthScreen({
           action: mode,
           email: fd.get("email") || undefined,
           password: fd.get("password") || undefined,
+          confirmPassword: fd.get("confirmPassword") || undefined,
           name: fd.get("name") || undefined,
         }),
       });
@@ -153,7 +164,7 @@ export function AuthScreen({
               >
                 <input
                   name="password"
-                  type="password"
+                  type={showPasswords ? "text" : "password"}
                   autoComplete={
                     mode === "login" ? "current-password" : "new-password"
                   }
@@ -162,6 +173,30 @@ export function AuthScreen({
                   maxLength={128}
                 />
               </Field>
+            )}
+            {(mode === "signup" || mode === "update") && (
+              <Field label="Confirm password">
+                <input
+                  name="confirmPassword"
+                  type={showPasswords ? "text" : "password"}
+                  autoComplete="new-password"
+                  required
+                  minLength={12}
+                  maxLength={128}
+                />
+              </Field>
+            )}
+            {mode !== "reset" && (
+              <label className="check-label password-visibility">
+                <input
+                  type="checkbox"
+                  checked={showPasswords}
+                  onChange={(e) => setShowPasswords(e.target.checked)}
+                />
+                {mode === "signup" || mode === "update"
+                  ? "Show passwords"
+                  : "Show password"}
+              </label>
             )}
             {(error || params.get("error")) && (
               <p className="error" role="alert">

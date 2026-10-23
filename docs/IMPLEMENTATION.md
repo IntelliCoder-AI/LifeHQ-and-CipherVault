@@ -18,9 +18,9 @@ Updated 2026-10-23. **Implemented and deployed; the full goal remains blocked on
 | Strict TypeScript | Both apps passed |
 | ESLint | Passed |
 | Next.js optimized builds | Both apps passed; LifeHQ also built on Vercel |
-| Optimized Playwright suite | **19 passed**, 1.5 minutes |
-| Expanded light/dark Axe scan | All nine LifeHQ sections and task editor passed; explicit theme-state assertion rerun passed |
-| Responsive screenshots | Nine LifeHQ sections at 1440/768/390, vault setup/unlocked at all three widths; additional detailed captures |
+| Optimized Playwright suite | **22 passed** |
+| Expanded light/dark Axe scan | All ten LifeHQ sections and task editor passed in both themes; signup also passed |
+| Responsive screenshots | Ten LifeHQ sections at 1440/768/390, vault setup/unlocked at all three widths; additional detailed captures |
 | Production dependency audit | Zero known vulnerabilities |
 | Supabase security advisors | No findings after both applied migrations |
 | Hosted login and demo | HTTP 200 through Vercel connector |
@@ -29,7 +29,7 @@ Updated 2026-10-23. **Implemented and deployed; the full goal remains blocked on
 | Hosted security headers | Nonce CSP, private/no-store, frame denial, nosniff, HSTS present |
 | GitHub Actions run | Workflow added; hosted result unverified because Actions API access was blocked |
 
-Screenshots in `docs/screenshots` are real browser captures with opt-in demo or dummy data. See [the screenshot index](SCREENSHOTS.md). Visual review prompted darker small-text accents, readable completed calendar labels, visible nonanimated chart bars, a reflowed mobile habit date control, and better mobile heading spacing. Network-failure tests exercise rejected requests; they do not fake a successful auth result.
+Screenshots in `docs/screenshots` are real browser captures with opt-in demo or dummy data. See [the screenshot index](SCREENSHOTS.md). Visual review prompted darker small-text accents on the signup illustration and plum theme, readable completed calendar labels, visible nonanimated chart bars, a reflowed mobile habit date control, and better mobile heading spacing. Network-failure tests exercise rejected requests. The separate signup form test uses a stubbed confirmation response solely to verify form submission; it does not prove real account creation.
 
 ## Published artifacts
 
@@ -47,3 +47,12 @@ Screenshots in `docs/screenshots` are real browser captures with opt-in demo or 
 4. Local full Supabase Docker startup was blocked by access to the `public.ecr.aws` image registry. Migrations were applied to hosted Supabase through the connector, and RLS tests ran in PGlite; do not infer Auth-service testing from either result.
 
 CipherVault's required prototype workflows are implemented and tested. It remains explicitly unaudited and unsuitable for real credentials. Independent security review is required before real use; JavaScript cannot guarantee secure memory erasure and local storage can be lost. No public vault deployment was made.
+
+## October 23 interface refinement
+
+- Replaced the green theme with ivory, rosewood, plum, and brass; enlarged interface text and small mobile labels.
+- Added confirmation and password visibility controls to signup/password update, with client and server mismatch validation.
+- Renamed the preferences section to Customize Overview, clarified its scope, and added Move down alongside Move up.
+- Added an always-visible CipherVault entry and local startup guide; the vault remains a separate local prototype.
+- Eliminated server-component requests for same-workspace section changes; history and unsaved-note guards remain in place. Memoized reminder computation and preload optional screens on hover/focus.
+- Configured LifeHQ functions for Mumbai (`bom1`) near Supabase. No paid resources added. Hosted performance is not benchmarked.

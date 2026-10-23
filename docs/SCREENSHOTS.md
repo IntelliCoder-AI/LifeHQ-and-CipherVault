@@ -13,6 +13,7 @@ Captured from running optimized applications using clearly labeled sample record
 | Notes | [1440px](screenshots/notes-1440.png) | [768px](screenshots/notes-768.png) | [390px](screenshots/notes-390.png) |
 | Review | [1440px](screenshots/review-1440.png) | [768px](screenshots/review-768.png) | [390px](screenshots/review-390.png) |
 | Settings | [1440px](screenshots/settings-1440.png) | [768px](screenshots/settings-768.png) | [390px](screenshots/settings-390.png) |
+| CipherVault access | [1440px](screenshots/ciphervault-1440.png) | [768px](screenshots/ciphervault-768.png) | [390px](screenshots/ciphervault-390.png) |
 | Vault Setup | [1440px](screenshots/vault-setup-1440.png) | [768px](screenshots/vault-setup-768.png) | [390px](screenshots/vault-setup-390.png) |
 | Vault Unlocked | [1440px](screenshots/vault-unlocked-1440.png) | [768px](screenshots/vault-unlocked-768.png) | [390px](screenshots/vault-unlocked-390.png) |
 | Vault Detail | [1440px](screenshots/vault-detail-1440.png) | [768px](screenshots/vault-detail-768.png) | [390px](screenshots/vault-detail-390.png) |
@@ -23,4 +24,5 @@ Additional detail captures:
 - [Markdown preview](screenshots/note-preview-1440.png) · [Mobile](screenshots/note-preview-390.png)
 - [Project board](screenshots/project-board-1440.png) · [Mobile](screenshots/project-board-390.png)
 - [Login](screenshots/login-1440.png) · [Mobile](screenshots/login-390.png)
+- [Signup](screenshots/signup-1440.png) · [Mobile](screenshots/signup-390.png)
 - [Dark overview](screenshots/overview-dark-1440.png)

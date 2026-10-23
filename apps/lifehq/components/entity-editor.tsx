@@ -109,7 +109,16 @@ export function EntityEditor({
       <select value={str(name)} onChange={(e) => set(name, e.target.value)}>
         {options.map((o) => (
           <option key={o} value={o}>
-            {o.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase())}
+            {name === "color"
+              ? (
+                  {
+                    forest: "Rosewood",
+                    copper: "Brass",
+                    ink: "Plum",
+                    sage: "Clay",
+                  } as Record<string, string>
+                )[o]
+              : o.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase())}
           </option>
         ))}
       </select>

@@ -62,13 +62,13 @@ export function TrendChart({ days = 7 }: { days?: number }) {
             <XAxis
               dataKey="date"
               tickFormatter={(s) => String(s).slice(8)}
-              tick={{ fill: "var(--muted)", fontSize: 10 }}
+              tick={{ fill: "var(--muted)", fontSize: 13 }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
               allowDecimals={false}
-              tick={{ fill: "var(--muted)", fontSize: 10 }}
+              tick={{ fill: "var(--muted)", fontSize: 13 }}
               axisLine={false}
               tickLine={false}
             />
@@ -84,7 +84,7 @@ export function TrendChart({ days = 7 }: { days?: number }) {
               isAnimationActive={false}
               dataKey="tasks"
               name="Completed tasks"
-              fill="var(--forest)"
+              fill="var(--accent-primary)"
               radius={[3, 3, 0, 0]}
               maxBarSize={18}
             />
@@ -281,11 +281,11 @@ export function AnalyticsPage({ remove }: { remove: RemoveRequest }) {
                         <LineChart data={series}>
                           <XAxis
                             dataKey="date"
-                            tick={{ fill: "var(--muted)", fontSize: 10 }}
+                            tick={{ fill: "var(--muted)", fontSize: 13 }}
                             tickFormatter={(s) => String(s).slice(5)}
                           />
                           <YAxis
-                            tick={{ fill: "var(--muted)", fontSize: 10 }}
+                            tick={{ fill: "var(--muted)", fontSize: 13 }}
                           />
                           <Tooltip
                             contentStyle={{
@@ -296,7 +296,7 @@ export function AnalyticsPage({ remove }: { remove: RemoveRequest }) {
                           <Line
                             isAnimationActive={false}
                             dataKey="value"
-                            stroke="var(--forest)"
+                            stroke="var(--accent-primary)"
                             strokeWidth={2}
                             dot={{ r: 3 }}
                           />
@@ -479,7 +479,7 @@ export function SettingsPage() {
                 }
               >
                 <option value="light">Warm ivory</option>
-                <option value="dark">Evening ink</option>
+                <option value="dark">Evening plum</option>
                 <option value="system">Follow system</option>
               </select>
             </Field>
@@ -548,10 +548,11 @@ export function SettingsPage() {
           </p>
         </section>
         <section className="paper-panel">
-          <SectionTitle title="Your command center" />
+          <SectionTitle title="Customize Overview" />
           <p className="subtle">
-            Choose what appears on your dashboard. Move sections up to change
-            their order.
+            Choose the sections shown on your Overview page. Move them up or
+            down to set their order, then save preferences. This does not change
+            the sidebar navigation.
           </p>
           <div className="dashboard-settings">
             {[
@@ -575,19 +576,36 @@ export function SettingsPage() {
                   {k[0].toUpperCase() + k.slice(1)}
                 </label>
                 {draft.dashboard.includes(k) && (
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    disabled={i === 0}
-                    onClick={() => {
-                      const list = [...draft.dashboard];
-                      [list[i - 1], list[i]] = [list[i], list[i - 1]];
-                      change("dashboard", list);
-                    }}
-                  >
-                    Move up
-                  </Button>
+                  <div className="dashboard-order-actions">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      disabled={i === 0}
+                      aria-label={`Move ${k} up`}
+                      onClick={() => {
+                        const list = [...draft.dashboard];
+                        [list[i - 1], list[i]] = [list[i], list[i - 1]];
+                        change("dashboard", list);
+                      }}
+                    >
+                      Move up
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      aria-label={`Move ${k} down`}
+                      disabled={i === draft.dashboard.length - 1}
+                      onClick={() => {
+                        const list = [...draft.dashboard];
+                        [list[i], list[i + 1]] = [list[i + 1], list[i]];
+                        change("dashboard", list);
+                      }}
+                    >
+                      Move down
+                    </Button>
+                  </div>
                 )}
               </div>
             ))}

@@ -29,7 +29,7 @@ Verification was performed on 2026-10-23. The final result ledger is in [docs/IM
 - **40 Vitest tests passed** across domain recurrence/progress, React primitives, cryptography, and real PostgreSQL RLS via PGlite.
 - Strict TypeScript and ESLint passed for both applications.
 - Both optimized Next.js production builds passed. A first restricted-sandbox build failed because Turbopack could not bind its local worker port; clearing its failed generated cache and rerunning with local network permission succeeded.
-- **19 Playwright tests passed against optimized production builds** (1.5 minutes), including all responsive and accessibility checks. The initial run found one sage contrast issue; broader scans found a missing chart-placeholder role. Both were corrected. A further light/dark scan with explicit theme-state assertions passed.
+- **22 Playwright tests passed against optimized production builds**, including responsive layouts, signup confirmation/visibility, local navigation/history, Overview section ordering, and CipherVault discoverability. The palette refresh exposed one low-contrast secondary label in the plum theme; its token was corrected and the complete suite passed. Final signup inspection also tightened muted illustration-text contrast and waits for bundled fonts before scanning. Subsequent small mobile-label enlargement was checked with the relevant responsive/accessibility tests.
 - Production dependency audit reported zero known vulnerabilities at the time of inspection. Supabase security advisors reported no findings after both migrations.
 
 ## Scope and evidence
@@ -46,7 +46,9 @@ The vault browser test creates dummy credentials, checks that IndexedDB contains
 
 Network-failure UI tests deliberately intercept the Auth endpoint with an aborted connection and a 429 error. They verify retained input and usable retry controls; they are **not successful real-auth tests**.
 
-Screenshots and overflow checks cover all nine LifeHQ sections at 1440, 768, and 390 pixels, plus vault setup/unlocked views. Axe scans target WCAG 2/2.1/2.2 A/AA rules for critical screens and controls. These automated results do not establish full WCAG compliance, usability with every assistive technology, or Safari/Firefox behavior.
+The signup form test stubs a successful confirmation response to check form behavior; it does not create a Supabase account. A direct request to the real local Auth route checks that mismatched passwords return HTTP 400 before contacting Supabase. Navigation tests assert no server-component or workspace-data request during section changes and verify browser back/forward.
+
+Screenshots and overflow checks cover all ten LifeHQ sections, including the CipherVault access guide at 1440, 768, and 390 pixels, plus vault setup/unlocked views. Axe scans target WCAG 2/2.1/2.2 A/AA rules for critical screens and controls. These automated results do not establish full WCAG compliance, usability with every assistive technology, or Safari/Firefox behavior.
 
 ## Open acceptance checks
 
@@ -59,3 +61,7 @@ Load/performance testing at large account sizes, cross-browser coverage, device-
 Vercel reports the LifeHQ production deployment READY. Using the Vercel connector, `/login` and `/demo` returned 200, `/api/workspace` returned 401 without a LifeHQ session, and `/workspace` resolved to the login page. Responses included nonce-based CSP, private/no-store caching, frame denial, content-type protection, and HSTS. This connector can use Vercel deployment-protection bypass links; these checks do not establish unrestricted browser access or execute client-side authenticated journeys. Direct shell/browser access to the deployment is blocked by the managed network proxy (CONNECT 403). The user cannot change this environment policy.
 
 A GitHub Actions verification workflow is committed. Its hosted result is unverified: the environment also rejected the GitHub Actions API request. Local executed checks above are the evidence, not an assumed CI pass.
+
+## Navigation measurement
+
+A six-section local Chromium sequence previously triggered six server-component requests; the same sequence now triggers zero. One idle local run measured a median click-to-heading interval of 101ms versus 159ms in the baseline. These small local samples are diagnostic, not a hosted performance guarantee. Functions are configured in Mumbai alongside the database region; hosted latency and large-workspace performance remain unmeasured.

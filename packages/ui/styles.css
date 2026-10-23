@@ -10,37 +10,37 @@
 @import "@fontsource/newsreader/500.css";
 @import "@fontsource/newsreader/400-italic.css";
 :root {
-  --paper: #f6f4ee;
-  --surface: #fffefb;
-  --ink: #202a27;
-  --muted: #56635b;
-  --forest: #365b50;
-  --forest-soft: #e7eee7;
-  --stone: #e9e5dd;
-  --line: #dcded4;
-  --copper: #854b2f;
-  --copper-soft: #f2e5d9;
-  --danger: #a53436;
-  --danger-soft: #fce8e6;
-  --shadow: 0 20px 80px #1828221f;
-  --sidebar: #eeeee5;
+  --paper: #faf7f2;
+  --surface: #fffdf9;
+  --ink: #563b4b;
+  --muted: #755f6c;
+  --accent-primary: #80506b;
+  --accent-soft: #f0e5ed;
+  --stone: #eee4e5;
+  --line: #deced6;
+  --copper: #866030;
+  --copper-soft: #f4ead7;
+  --danger: #a13e49;
+  --danger-soft: #fae6e5;
+  --shadow: 0 20px 80px #67465d1f;
+  --sidebar: #f2ebee;
   color-scheme: light;
 }
 [data-theme="dark"] {
-  --paper: #171f1d;
-  --surface: #1d2925;
-  --ink: #f0efe5;
-  --muted: #adbab0;
-  --forest: #a7c7b0;
-  --forest-soft: #2b4236;
-  --stone: #29352f;
-  --line: #3b4b40;
-  --copper: #e0b08e;
-  --copper-soft: #47362b;
-  --danger: #ffaaa9;
-  --danger-soft: #4b292b;
-  --sidebar: #1a241f;
-  --shadow: 0 20px 80px #0005;
+  --paper: #49324a;
+  --surface: #563c53;
+  --ink: #fff4e7;
+  --muted: #e5cedb;
+  --accent-primary: #f2d6b3;
+  --accent-soft: #714d68;
+  --stone: #65495f;
+  --line: #896981;
+  --copper: #efd2a9;
+  --copper-soft: #6f4c41;
+  --danger: #ffd2cd;
+  --danger-soft: #76444e;
+  --sidebar: #432d45;
+  --shadow: 0 20px 80px #56304455;
   color-scheme: dark;
 }
 * {
@@ -51,7 +51,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   font-family: "DM Sans", sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
 }
@@ -73,11 +73,11 @@ h1 {
   line-height: 1.1;
 }
 h2 {
-  font-size: 28px;
+  font-size: 31px;
   line-height: 1.15;
 }
 h3 {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
 }
 a {
@@ -133,7 +133,7 @@ textarea {
 input[type="checkbox"] {
   width: 18px;
   height: 18px;
-  accent-color: var(--forest);
+  accent-color: var(--accent-primary);
 }
 textarea {
   resize: vertical;
@@ -148,7 +148,7 @@ textarea {
   padding: 10px 17px;
   border-radius: 7px;
   font-weight: 500;
-  font-size: 13px;
+  font-size: 16px;
   white-space: nowrap;
   transition:
     background 0.15s,
@@ -162,11 +162,11 @@ textarea {
   transform: translateY(1px);
 }
 .button-primary {
-  background: var(--forest);
+  background: var(--accent-primary);
   color: var(--surface);
 }
 [data-theme="dark"] .button-primary {
-  color: #17251c;
+  color: #49324a;
 }
 .button-secondary {
   border-color: var(--line);
@@ -195,12 +195,12 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 7px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 600;
   min-width: 0;
 }
 .field small {
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 400;
 }
 .field-row,
@@ -230,14 +230,14 @@ textarea {
   align-items: center;
   gap: 10px;
   min-height: 40px;
-  font-size: 13px;
+  font-size: 16px;
 }
 .muted {
   color: var(--muted);
 }
 .eyebrow {
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.16em;
   color: var(--muted);
@@ -250,7 +250,7 @@ textarea {
   gap: 5px;
   border-radius: 4px;
   padding: 3px 7px;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.025em;
   white-space: nowrap;
@@ -260,8 +260,8 @@ textarea {
 .badge-forest,
 .badge-done,
 .badge-active {
-  background: var(--forest-soft);
-  color: var(--forest);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
 }
 .badge-copper,
 .badge-high,
@@ -275,8 +275,8 @@ textarea {
   color: var(--danger);
 }
 .badge-low {
-  background: var(--forest-soft);
-  color: var(--forest);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
 }
 .progress {
   height: 5px;
@@ -287,7 +287,7 @@ textarea {
 .progress > span {
   display: block;
   height: 100%;
-  background: var(--forest);
+  background: var(--accent-primary);
   transition: width 0.3s;
 }
 .section-heading {
@@ -298,15 +298,15 @@ textarea {
   margin-bottom: 23px;
 }
 .section-heading h2 {
-  font-size: 25px;
+  font-size: 28px;
 }
 .text-link {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   min-height: 36px;
-  color: var(--forest);
-  font-size: 12px;
+  color: var(--accent-primary);
+  font-size: 15px;
   font-weight: 600;
 }
 .empty {
@@ -316,8 +316,8 @@ textarea {
   margin: auto;
 }
 .empty-symbol {
-  background: var(--forest-soft);
-  color: var(--forest);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
   width: 52px;
   height: 52px;
   display: grid;
@@ -327,19 +327,19 @@ textarea {
 }
 .empty h3 {
   font-family: "Newsreader", serif;
-  font-size: 25px;
+  font-size: 28px;
   font-weight: 400;
   margin-bottom: 7px;
 }
 .empty p {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 16px;
   margin-bottom: 18px;
 }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: #14251dc0;
+  background: #67465dc0;
   backdrop-filter: blur(4px);
   z-index: 90;
 }
@@ -370,11 +370,11 @@ textarea {
 }
 .modal-title {
   font-family: "Newsreader", serif;
-  font-size: 31px;
+  font-size: 34px;
   line-height: 1.15;
 }
 .modal-heading p {
-  font-size: 12px;
+  font-size: 15px;
   margin-top: 7px;
 }
 .error {
@@ -382,21 +382,21 @@ textarea {
   color: var(--danger);
   padding: 12px 16px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 16px;
 }
 .notice {
-  background: var(--forest-soft);
-  color: var(--forest);
+  background: var(--accent-soft);
+  color: var(--accent-primary);
   padding: 12px 16px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 16px;
 }
 .warning {
   background: var(--copper-soft);
   color: var(--copper);
   padding: 12px 16px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 15px;
 }
 .stack {
   display: flex;
@@ -452,7 +452,7 @@ textarea {
   width: 22px;
   height: 22px;
   border: 2px solid var(--stone);
-  border-top-color: var(--forest);
+  border-top-color: var(--accent-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -473,12 +473,12 @@ textarea {
 .tab-bar button {
   padding: 7px 12px;
   border-radius: 5px;
-  font-size: 12px;
+  font-size: 15px;
   min-height: 36px;
 }
 .tab-bar button[aria-pressed="true"] {
   background: var(--surface);
-  box-shadow: 0 1px 3px #0001;
+  box-shadow: 0 1px 3px #67465d15;
 }
 .truncate {
   overflow: hidden;
@@ -489,7 +489,7 @@ textarea {
   font-variant-numeric: tabular-nums;
 }
 .subtle {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--muted);
 }
 .full-width {
@@ -508,10 +508,10 @@ textarea {
   padding: 13px 22px;
   box-shadow: var(--shadow);
   max-width: calc(100vw - 24px);
-  font-size: 13px;
+  font-size: 16px;
 }
 .markdown {
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.85;
   overflow-wrap: anywhere;
 }
@@ -534,7 +534,7 @@ textarea {
   list-style: revert;
 }
 .markdown a {
-  color: var(--forest);
+  color: var(--accent-primary);
   text-decoration: underline;
 }
 .markdown blockquote {

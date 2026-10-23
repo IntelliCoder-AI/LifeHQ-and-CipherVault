@@ -23,8 +23,14 @@ export async function POST(request: Request) {
           .optional(),
         name: z.string().max(80).optional(),
         confirmation: z.string().optional(),
+        confirmPassword: z.string().max(128).optional(),
       })
       .parse(await body(request));
+    if (
+      (input.action === "signup" || input.action === "update") &&
+      input.password !== input.confirmPassword
+    )
+      return json({ error: "Passwords do not match." }, 400);
     const db = await supabase();
     const origin = request.headers.get("origin")!;
     if (input.action === "logout") {

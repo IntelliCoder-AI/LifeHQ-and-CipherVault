@@ -2,7 +2,7 @@
 
 ## Boundaries
 
-LifeHQ and CipherVault are independent Next.js applications on separate origins. They share visual components, fonts, and styles. CipherVault does not import the Supabase client, LifeHQ data store, or LifeHQ domain models. Its only durable sensitive state is authenticated ciphertext in its own origin's IndexedDB. A LifeHQ navigation link opens the other origin with no credential handoff.
+LifeHQ and CipherVault are independent Next.js applications on separate origins. They share visual components, fonts, and styles. CipherVault does not import the Supabase client, LifeHQ data store, or LifeHQ domain models. Its only durable sensitive state is authenticated ciphertext in its own origin's IndexedDB. LifeHQ always shows a CipherVault navigation entry. It opens an explanatory access guide, whose launch link opens the separate local origin with no credential handoff. No vault unlock UI or cryptographic state is hosted inside LifeHQ.
 
 LifeHQ account pages use a client workspace store backed by same-origin API routes. Route handlers validate the Supabase user, validate inputs with Zod, and query PostgreSQL with the caller's session. No service-role credentials are used. Next.js `proxy.ts` refreshes cookie sessions and sets a fresh CSP nonce. Protected server pages verify the user again. Authenticated responses are private and not cached publicly.
 
@@ -35,3 +35,7 @@ Habit streaks count scheduled days or successful ISO weeks. Unscheduled days do 
 ## Reliability and payloads
 
 Client writes update displayed data only after successful persistence. Note autosaves are debounced and serialized, track versions, preserve the draft on failure, and warn on unsaved navigation. Calendar, notes, analytics, goals, habits, and settings are loaded on demand; charts are dynamically imported. Fonts are bundled locally. There are no external scripts, images, analytics, AI calls, paid APIs, or remote font dependencies. A manifest and icon establish a responsive PWA foundation; offline service workers and push delivery are not implemented.
+
+Workspace sections share one client shell and its loaded data. Same-workspace navigation uses Next.js native History integration so pathname and search parameters update without fetching another server component payload. Browser back/forward remains supported. Initial loads, cross-boundary navigation, and every API operation retain server authentication checks; client navigation grants no data access. Note drafts can cancel section navigation while unsaved. Optional section bundles preload on navigation hover/focus.
+
+LifeHQ functions are configured for Vercel `bom1`, near the Supabase database in Mumbai (`ap-south-1`). This reduces geographic separation; hosted latency has not been benchmarked.
