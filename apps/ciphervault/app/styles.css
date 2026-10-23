@@ -18,7 +18,7 @@
   --ink: #fff0d8;
   --muted: #e3cdb0;
   --accent-primary: #f0c37d;
-  --accent-soft: #725a3d;
+  --accent-soft: #624932;
   --stone: #69553f;
   --line: #967a5b;
   --copper: #f5d092;
@@ -940,4 +940,8 @@
     padding-inline: 8px;
     gap: 4px;
   }
+}
+/* Theme changes must not blend a light button into a dark label. */
+.vault-app .button {
+  transition: transform 0.15s;
 }

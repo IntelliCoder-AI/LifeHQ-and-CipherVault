@@ -244,6 +244,27 @@ for (const width of [1440, 768, 390])
       path: `docs/screenshots/vault-unlocked-${width}.png`,
       fullPage: true,
     });
+    if (width === 1440) {
+      await page
+        .getByRole("switch", { name: "Dark theme", exact: true })
+        .click();
+      const unlockedScan = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(
+        unlockedScan.violations.map((v) => ({
+          id: v.id,
+          nodes: v.nodes.map((n) => ({
+            target: n.target,
+            summary: n.failureSummary,
+          })),
+        })),
+      ).toEqual([]);
+      await page
+        .getByRole("switch", { name: "Dark theme", exact: true })
+        .click();
+    }
+
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth > innerWidth + 1,
