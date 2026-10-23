@@ -63,3 +63,5 @@ CipherVault's required prototype workflows are implemented and tested. It remain
 - Public login/auth requests no longer do middleware session-refresh work. Successful login performs one navigation; protected-page identity checks use verified claims, and API routes retain fresh user checks. Profile loading now runs alongside workspace-record requests.
 - CipherVault has its own branding, geometric presentation, standalone product page, and separate Vercel project. The production launcher uses a verified HTTPS origin instead of localhost. Hosting serves the interface; vault records remain local-only.
 - Automatic review rejected removing Vercel SSO protection; that access setting was retained. No paid services or cloud vault storage were enabled.
+
+CipherVault interface: https://ciphervault-radhe12.vercel.app — a separate browser-local prototype. The production root returned HTTP 200 through the Vercel connector, with its restrictive CSP and prototype label. This does not establish an independent crypto audit or complete hosted browser verification.

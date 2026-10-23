@@ -705,6 +705,12 @@ test("Overview customization moves and hides its sections, and CipherVault is al
   ).toBeVisible();
   await expect(companion.locator(".sidebar")).toHaveCount(0);
   await expect(companion.locator("a[href*='localhost']")).toHaveCount(0);
+  await expect(
+    companion.getByRole("link", { name: "Open CipherVault", exact: false }),
+  ).toHaveAttribute("href", "https://ciphervault-radhe12.vercel.app");
+  await expect(
+    companion.getByRole("link", { name: "Open CipherVault", exact: false }),
+  ).toHaveAttribute("target", "_blank");
   await expect(companion.locator(".cipher-prototype")).toContainText(
     "dummy credentials only",
   );

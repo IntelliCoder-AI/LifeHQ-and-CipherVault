@@ -73,3 +73,5 @@ Further documentation: [Architecture](ARCHITECTURE.md), [Design system](DESIGN_S
 ![LifeHQ dashboard with explicitly labeled local sample records](docs/screenshots/overview-1440.png)
 
 [Mobile tasks](docs/screenshots/tasks-390.png) · [Note editor](docs/screenshots/note-editor-1440.png) · [Project board](docs/screenshots/project-board-1440.png) · [Dark theme](docs/screenshots/overview-dark-1440.png) · [Vault dummy item](docs/screenshots/vault-detail-1440.png) · [Planner](docs/screenshots/planner-1440.png) · [Goals](docs/screenshots/goals-1440.png) · [Habits](docs/screenshots/habits-390.png) · [CipherVault setup](docs/screenshots/vault-setup-1440.png)
+
+CipherVault interface: https://ciphervault-radhe12.vercel.app — a separate browser-local prototype. The production root returned HTTP 200 through the Vercel connector, with its restrictive CSP and prototype label. This does not establish an independent crypto audit or complete hosted browser verification.

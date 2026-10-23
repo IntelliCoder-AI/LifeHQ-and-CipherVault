@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import "@lifehq/ui/styles.css";
 import "./styles.css";
 export const metadata: Metadata = {
-  title: "CipherVault — Local prototype",
+  title: "CipherVault — Your secrets. Your custody.",
   description:
     "An encrypted local-only prototype. Not independently audited. Use dummy credentials only.",
   robots: { index: false, follow: false },

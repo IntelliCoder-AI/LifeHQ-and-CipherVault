@@ -27,7 +27,7 @@ export function VaultAccess() {
           CIPHER<span className="cipher-wordmark-light">VAULT</span>
         </Link>
         <div className="row">
-          <Link className="cipher-back" href="/demo">
+          <Link className="cipher-back" href="/">
             <ArrowLeft size={16} /> LifeHQ
           </Link>
           <ThemeToggle />
