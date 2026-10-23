@@ -1,0 +1,42 @@
+name: Verify
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Anonymous-route checks need a configured client, but no account or secret.
+      # Hosted authentication is a separate acceptance test, not simulated here.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: e2e-public-placeholder
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Browser tests against optimized builds
+        run: |
+          npm run start -w @lifehq/app > /tmp/lifehq.log 2>&1 &
+          npm run start -w @lifehq/vault > /tmp/vault.log 2>&1 &
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/demo >/dev/null && curl -fsS http://localhost:3001 >/dev/null; then break; fi
+            sleep 1
+          done
+          E2E_EXTERNAL=1 npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-report
+          path: playwright-report
+          retention-days: 7

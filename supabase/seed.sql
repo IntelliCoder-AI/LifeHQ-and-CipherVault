@@ -1,0 +1,2 @@
+-- New accounts start empty. Optional sample records exist only in the
+-- explicitly labeled, browser-local /demo workspace, never in this database.
