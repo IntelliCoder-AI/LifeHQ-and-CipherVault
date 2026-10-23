@@ -6,6 +6,8 @@ A separate Supabase project named **LifeHQ** was created in the **Anurag** organ
 
 The connected Vercel team **Radhe** (`radhe12`) reports **Hobby**. No paid services, custom domain purchase, AI APIs, enhanced builds, or plan upgrades are enabled by this repository. Remain within provider quotas; free hosting can pause or reject work when limits are exceeded.
 
+LifeHQ is deployed at **https://lifehq-radhe12.vercel.app**, with additional alias `https://lifehq-three.vercel.app`. Source is published on the repository’s `main` branch. The deployment was uploaded through Vercel’s source-file API because the GitHub integration rejected this repository. Git pushes will not automatically redeploy until the owner authorizes the Vercel GitHub integration for this repository and links it to the LifeHQ project.
+
 Deployment verification results and any unresolved external blockers are recorded in [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md). A source repository alone is not a verified live deployment.
 
 ## Supabase
@@ -20,11 +22,11 @@ supabase db push
 
 Inspect pending migrations before applying to an existing database. Never reset a production project to install this app. `supabase start` plus `supabase db reset` is for a disposable local Docker database only. The seed is intentionally empty. Local Docker startup could not be verified in this managed environment because access to `public.ecr.aws` is blocked.
 
-In **Authentication → URL Configuration**, set Site URL to the exact LifeHQ production origin. Add these redirect URLs for that origin:
+For this delivery, the user confirmed that the production Site URL and both redirect URLs below are saved. For another installation, in **Authentication → URL Configuration**, set Site URL to the exact LifeHQ production origin. Add these redirect URLs for that origin:
 
 ```text
-https://YOUR_LIFEHQ_DOMAIN/auth/callback
-https://YOUR_LIFEHQ_DOMAIN/auth/callback?next=/reset
+https://lifehq-radhe12.vercel.app/auth/callback
+https://lifehq-radhe12.vercel.app/auth/callback?next=/reset
 ```
 
 For local testing add `http://localhost:3000/auth/callback` and `http://localhost:3000/auth/callback?next=/reset`. Add only trusted preview origins when testing preview authentication. Keep email confirmation enabled for production. Use Supabase's supported PKCE callback email flow; `/auth/confirm` also supports validated token-hash confirmation templates. Do not point production email links at localhost.
@@ -33,7 +35,7 @@ Supabase's built-in email service has provider restrictions and low rate limits.
 
 ## Vercel LifeHQ project
 
-Import `IntelliCoder-AI/LifeHQ-and-CipherVault`, choose Next.js, and set **Root Directory** to `apps/lifehq`. Include source outside the root directory for the shared workspace packages. Use the repository's root npm lockfile and normal workspace install (`npm ci` at the monorepo root), with `npm run build` in `apps/lifehq`. Do not use the root build command for the LifeHQ deployment; that would also build the local vault unnecessarily. Choose Node 22 or 24.
+Import `IntelliCoder-AI/LifeHQ-and-CipherVault`, choose Next.js, and set **Root Directory** to `apps/lifehq`. Include source outside the root directory for the shared workspace packages. Use the repository's root npm lockfile and normal workspace install (`npm ci` at the monorepo root), with `npm run build` in `apps/lifehq`. The checked-in `apps/lifehq/vercel.json` sets the root install command to `cd ../.. && npm ci`. Do not use the root build command for the LifeHQ deployment; that would also build the local vault unnecessarily. Choose Node 22 or 24.
 
 Set these environment variables for the appropriate deployment targets:
 
@@ -57,7 +59,7 @@ If Git linking is rejected, authorize the Vercel GitHub integration for this rep
 5. Check guessed IDs and cross-owner references using the second user's authenticated requests. Expect no foreign records and rejected associations.
 6. Export the disposable account's data, then use the account's own confirmed deletion flow. Do not delete unrelated existing user accounts.
 
-The managed environment currently blocks direct access to the new `*.supabase.co` project hostname. Allow `vcxxhpglhfkdxliwieao.supabase.co` in the task environment's network policy to enable local live-auth testing. The Supabase connector can apply SQL but does not configure Auth URL settings or provide an email inbox. Those limits are not evidence of a product test passing.
+The managed environment blocks direct access to both `lifehq-radhe12.vercel.app` and `vcxxhpglhfkdxliwieao.supabase.co`. The user cannot modify that policy. Run live browser/auth checks from an unrestricted local machine, or have the environment administrator allow those hosts. The Supabase connector can apply SQL but does not configure Auth URL settings or provide an email inbox. Those limits are not evidence of a product test passing.
 
 ## CipherVault
 

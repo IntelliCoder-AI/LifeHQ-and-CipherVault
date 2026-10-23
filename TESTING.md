@@ -29,7 +29,7 @@ Verification was performed on 2026-10-23. The final result ledger is in [docs/IM
 - **40 Vitest tests passed** across domain recurrence/progress, React primitives, cryptography, and real PostgreSQL RLS via PGlite.
 - Strict TypeScript and ESLint passed for both applications.
 - Both optimized Next.js production builds passed. A first restricted-sandbox build failed because Turbopack could not bind its local worker port; clearing its failed generated cache and rerunning with local network permission succeeded.
-- Initial production Playwright run: 14 passed, 3 failed on the same sage text contrast issue. The color was corrected; subsequent results are recorded in the final ledger rather than treating this initial run as all green.
+- **19 Playwright tests passed against optimized production builds** (1.5 minutes), including all responsive and accessibility checks. The initial run found one sage contrast issue; broader scans found a missing chart-placeholder role. Both were corrected. A further light/dark scan with explicit theme-state assertions passed.
 - Production dependency audit reported zero known vulnerabilities at the time of inspection. Supabase security advisors reported no findings after both migrations.
 
 ## Scope and evidence
@@ -50,6 +50,12 @@ Screenshots and overflow checks cover all nine LifeHQ sections at 1440, 768, and
 
 ## Open acceptance checks
 
-Actual hosted registration, confirmation mail, password recovery, account persistence across sign-out/return, and full hosted two-user journeys remain unverified until redirect/email configuration and network access are resolved. The local demo uses browser persistence; it must not be presented as proof of Supabase persistence. Follow the explicit hosted checklist in [DEPLOYMENT.md](DEPLOYMENT.md).
+Actual hosted registration, confirmation mail, password recovery, account persistence across sign-out/return, and full hosted two-user journeys remain unverified until live network access and actual test-account/email verification are available. The user confirmed production redirect configuration is saved. The local demo uses browser persistence; it must not be presented as proof of Supabase persistence. Follow the explicit hosted checklist in [DEPLOYMENT.md](DEPLOYMENT.md).
 
 Load/performance testing at large account sizes, cross-browser coverage, device-level accessibility review, and independent vault security review remain outside the executed evidence. No invented Lighthouse score or blanket “production secure” claim is made.
+
+## Hosted HTTP checks
+
+Vercel reports the LifeHQ production deployment READY. Using the Vercel connector, `/login` and `/demo` returned 200, `/api/workspace` returned 401 without a LifeHQ session, and `/workspace` resolved to the login page. Responses included nonce-based CSP, private/no-store caching, frame denial, content-type protection, and HSTS. This connector can use Vercel deployment-protection bypass links; these checks do not establish unrestricted browser access or execute client-side authenticated journeys. Direct shell/browser access to the deployment is blocked by the managed network proxy (CONNECT 403). The user cannot change this environment policy.
+
+A GitHub Actions verification workflow is committed. Its hosted result is unverified: the environment also rejected the GitHub Actions API request. Local executed checks above are the evidence, not an assumed CI pass.

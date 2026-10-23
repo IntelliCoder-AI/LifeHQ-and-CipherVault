@@ -476,6 +476,7 @@ test("major screens and the editor meet automated accessibility checks in both t
       "settings",
     ]) {
       await page.goto(`/demo/${section}`);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await expect(page.locator(".loading")).toHaveCount(0);
       await page.evaluate(() => document.fonts.ready);
       const result = await new AxeBuilder({ page })

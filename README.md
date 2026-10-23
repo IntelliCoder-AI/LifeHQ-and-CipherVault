@@ -4,6 +4,8 @@ An editorial personal workspace and an independently isolated, encrypted local v
 
 **CipherVault is not independently audited. Use dummy credentials only. It is unsuitable for real credentials until expert review.**
 
+LifeHQ is deployed at **https://lifehq-radhe12.vercel.app** ([demo](https://lifehq-radhe12.vercel.app/demo)). The hosted login/demo responses and protected-route denial were checked through the Vercel connector. Full hosted authentication acceptance remains open. Source: [IntelliCoder-AI/LifeHQ-and-CipherVault](https://github.com/IntelliCoder-AI/LifeHQ-and-CipherVault).
+
 ## Run locally
 
 Use Node.js 22 or 24 and npm. From the repository root:
@@ -70,4 +72,4 @@ Further documentation: [Architecture](ARCHITECTURE.md), [Design system](DESIGN_S
 
 ![LifeHQ dashboard with explicitly labeled local sample records](docs/screenshots/overview-1440.png)
 
-[Mobile tasks](docs/screenshots/tasks-390.png) · [Planner](docs/screenshots/planner-1440.png) · [Goals](docs/screenshots/goals-1440.png) · [Habits](docs/screenshots/habits-390.png) · [CipherVault setup](docs/screenshots/vault-setup-1440.png)
+[Mobile tasks](docs/screenshots/tasks-390.png) · [Note editor](docs/screenshots/note-editor-1440.png) · [Project board](docs/screenshots/project-board-1440.png) · [Dark theme](docs/screenshots/overview-dark-1440.png) · [Vault dummy item](docs/screenshots/vault-detail-1440.png) · [Planner](docs/screenshots/planner-1440.png) · [Goals](docs/screenshots/goals-1440.png) · [Habits](docs/screenshots/habits-390.png) · [CipherVault setup](docs/screenshots/vault-setup-1440.png)

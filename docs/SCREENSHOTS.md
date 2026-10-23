@@ -1,0 +1,26 @@
+# Screenshots
+
+Captured from running optimized applications using clearly labeled sample records and dummy vault data. These are local-browser screenshots, not proof of hosted authentication.
+
+| Screen | Desktop 1440 | Tablet 768 | Mobile 390 |
+| --- | --- | --- | --- |
+| Overview | [1440px](screenshots/overview-1440.png) | [768px](screenshots/overview-768.png) | [390px](screenshots/overview-390.png) |
+| Tasks | [1440px](screenshots/tasks-1440.png) | [768px](screenshots/tasks-768.png) | [390px](screenshots/tasks-390.png) |
+| Planner | [1440px](screenshots/planner-1440.png) | [768px](screenshots/planner-768.png) | [390px](screenshots/planner-390.png) |
+| Projects | [1440px](screenshots/projects-1440.png) | [768px](screenshots/projects-768.png) | [390px](screenshots/projects-390.png) |
+| Goals | [1440px](screenshots/goals-1440.png) | [768px](screenshots/goals-768.png) | [390px](screenshots/goals-390.png) |
+| Habits | [1440px](screenshots/habits-1440.png) | [768px](screenshots/habits-768.png) | [390px](screenshots/habits-390.png) |
+| Notes | [1440px](screenshots/notes-1440.png) | [768px](screenshots/notes-768.png) | [390px](screenshots/notes-390.png) |
+| Review | [1440px](screenshots/review-1440.png) | [768px](screenshots/review-768.png) | [390px](screenshots/review-390.png) |
+| Settings | [1440px](screenshots/settings-1440.png) | [768px](screenshots/settings-768.png) | [390px](screenshots/settings-390.png) |
+| Vault Setup | [1440px](screenshots/vault-setup-1440.png) | [768px](screenshots/vault-setup-768.png) | [390px](screenshots/vault-setup-390.png) |
+| Vault Unlocked | [1440px](screenshots/vault-unlocked-1440.png) | [768px](screenshots/vault-unlocked-768.png) | [390px](screenshots/vault-unlocked-390.png) |
+| Vault Detail | [1440px](screenshots/vault-detail-1440.png) | [768px](screenshots/vault-detail-768.png) | [390px](screenshots/vault-detail-390.png) |
+
+Additional detail captures:
+
+- [Note editor](screenshots/note-editor-1440.png) · [Mobile](screenshots/note-editor-390.png)
+- [Markdown preview](screenshots/note-preview-1440.png) · [Mobile](screenshots/note-preview-390.png)
+- [Project board](screenshots/project-board-1440.png) · [Mobile](screenshots/project-board-390.png)
+- [Login](screenshots/login-1440.png) · [Mobile](screenshots/login-390.png)
+- [Dark overview](screenshots/overview-dark-1440.png)

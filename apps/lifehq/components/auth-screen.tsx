@@ -71,15 +71,12 @@ export function AuthScreen({
           </span>
           <h1>
             Your life,
-            <br />
-            thoughtfully
-            <br />
-            <em>put together.</em>
+            <br /> thoughtfully
+            <br /> <em>put together.</em>
           </h1>
           <p>
             A quiet space for the things that matter.
-            <br />
-            Make room for your days, ideas, and ambitions.
+            <br /> Make room for your days, ideas, and ambitions.
           </p>
           <div className="atelier-illustration" aria-hidden="true">
             <div className="orbit orbit-one" />
