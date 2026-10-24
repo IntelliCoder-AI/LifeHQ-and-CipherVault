@@ -69,3 +69,9 @@ CipherVault interface: https://ciphervault-radhe12.vercel.app — a separate bro
 ## Dark-mode visual refinement
 
 Dark-only tokens and overrides reduce the brown/yellow cast, separate header/sidebar/panel surfaces, soften decorative borders, and improve control and placeholder visibility. CipherVault's warning banner and active navigation use restrained tones. Light-mode tokens and layout are unchanged. Optimized builds and ESLint passed; six focused existing browser theme/accessibility checks passed, plus contrast/overflow checks across 11 additional dark captures using dummy records. The selected vault record and editor passed at desktop, tablet, and/or mobile sizes. The password-strength graphic also received a valid accessible image role. No authentication, storage, cryptographic, or data-access behavior changed.
+
+## Reference-inspired personal palette — 2026-10-24
+
+LifeHQ now adapts visual principles from Tiimo, Structured, and TeuxDeux: a warm white canvas, coral actions, a soft sunrise greeting, lilac scheduling, and differentiated pastel project cards. Daylight and Moonlight keep matching color families at readable contrast. Existing project color IDs remain compatible with saved records; displayed labels now read Coral, Apricot, Lilac, and Butter. CipherVault's independent palette remains unchanged.
+
+Validation before publication: optimized LifeHQ build and ESLint passed. Six existing Playwright checks passed, including responsive screens at 1440/768/390, all major sections in both themes, signup, and theme persistence. Fourteen additional reference-palette captures were taken; Overview and Projects passed contrast and overflow checks in both themes. See [the reference notes](DESIGN_REFERENCES.md) and [screenshot index](SCREENSHOTS.md). Hosted full-auth acceptance remains a separate unresolved check.

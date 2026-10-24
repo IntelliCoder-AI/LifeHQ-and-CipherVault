@@ -4,19 +4,21 @@ The interface combines editorial headings with a restrained working canvas. Over
 
 ## Foundations
 
-Tokens live in `packages/ui/styles.css`. DM Sans is the readable interface face; Newsreader provides editorial headings and occasional italic emphasis. Both are bundled open-source fonts; no remote font requests occur. Lucide supplies consistent outlined icons. Layouts use whitespace, rules, and a small number of raised surfaces rather than uniform cards everywhere.
+Shared primitives live in `packages/ui/styles.css`; LifeHQ now owns its personal palette in `apps/lifehq/app/styles.css`, while CipherVault owns its separate palette in its app stylesheet. DM Sans is the readable interface face; Newsreader provides editorial headings and occasional italic emphasis. Both are bundled open-source fonts; no remote font requests occur. Lucide supplies consistent outlined icons. Layouts use whitespace, rules, and a small number of raised surfaces rather than uniform cards everywhere.
 
 | Token | Light | Dark |
 | --- | --- | --- |
-| Paper | `#faf8f4` | `#493f46` |
-| Surface | `#fffefa` | `#594c55` |
-| Ink | `#514237` | `#f4eef1` |
-| Muted text | `#726354` | `#d9cdd4` |
-| Primary accent | `#9b4935` | `#eac2b3` |
-| Stone | `#eee8df` | `#63525c` |
-| Brass accent | `#805e25` | `#d8c2a6` |
+| Paper | `#fffcf8` | `#49334e` |
+| Surface | `#fffefa` | `#533f5b` |
+| Ink | `#593c55` | `#fff2f8` |
+| Muted text | `#73566b` | `#ddc9d8` |
+| Coral accent | `#b34160` | `#f4b0be` |
+| Stone | `#eee4ee` | `#634967` |
+| Apricot accent | `#955127` | `#f2c4a3` |
+| Lilac card | `#f1eafb` | `#594168` |
+| Butter card | `#fff5d9` | `#5e5031` |
 
-LifeHQ uses neutral ivory surfaces, warm brown text, and restrained terracotta accents. Navigation uses a subtle active background and a thin accent rule. Soft dusk is the evening theme. The header toggle changes light/dark appearance immediately; Settings also supports system appearance. A nonce-authorized bootstrap applies saved appearance before first paint. Account preferences sync the workspace theme; the login page retains a nonsensitive device preference.
+LifeHQ's Daylight and Moonlight themes adapt the personal planning principles in [the reference notes](docs/DESIGN_REFERENCES.md). A warm paper canvas, coral actions, and lilac/apricot/butter color groups make the different parts of the day recognizable. The greeting has a sunrise wash; schedule and project surfaces have gentle color and rounded corners. The header toggle changes appearance immediately; Settings supports system appearance. A nonce-authorized bootstrap applies saved appearance before first paint. Account preferences sync the workspace theme; login retains a nonsensitive device preference.
 
 CipherVault owns separate sandstone/ochre tokens, geometric branding, sans-serif headings, and a standalone lock screen. LifeHQ links to a standalone product page that launches the independent web origin. No vault unlock screen, keys, or encrypted records live in LifeHQ.
 
@@ -38,6 +40,6 @@ Focus uses a visible accent outline. Motion is short and limited to state transi
 
 ## Dark-mode refinement
 
-Dark mode uses desaturated dusk surfaces and off-white text in LifeHQ, with muted stone/champagne tones in CipherVault. Decorative dividers stay quiet; form inputs and secondary actions have a separate higher-contrast control border. Toasts use raised dark surfaces, and the vault prototype notice uses neutral text instead of a large amber band. Light-mode tokens are unchanged.
+LifeHQ’s Moonlight theme uses plum surfaces with rose, lilac, apricot, and butter accents; CipherVault retains muted stone/champagne tones. Decorative dividers stay quiet; form inputs and secondary actions have a separate higher-contrast control border. Toasts use raised dark surfaces, and the vault prototype notice uses neutral text instead of a large amber band. LifeHQ’s Daylight palette is documented above; the independent CipherVault palette is unchanged by this reference-inspired update.
 
 Visual verification includes empty and populated Overview screens, the vault setup, a selected dummy record, and the edit dialog at desktop and mobile sizes. The vault palette remains distinct from LifeHQ.

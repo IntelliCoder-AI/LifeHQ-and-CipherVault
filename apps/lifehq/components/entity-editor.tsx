@@ -112,10 +112,10 @@ export function EntityEditor({
             {name === "color"
               ? (
                   {
-                    forest: "Rosewood",
-                    copper: "Brass",
-                    ink: "Plum",
-                    sage: "Clay",
+                    forest: "Coral",
+                    copper: "Apricot",
+                    ink: "Lilac",
+                    sage: "Butter",
                   } as Record<string, string>
                 )[o]
               : o.replaceAll("_", " ").replace(/^./, (c) => c.toUpperCase())}

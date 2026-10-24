@@ -1,3 +1,54 @@
+/* Personal planner palette, adapted from Tiimo, Structured and TeuxDeux. */
+:root {
+  --paper: #fffcf8;
+  --surface: #fffefa;
+  --ink: #593c55;
+  --muted: #73566b;
+  --accent-primary: #b34160;
+  --accent-soft: #fbe8ee;
+  --stone: #eee4ee;
+  --line: #dfcfdf;
+  --control-line: #9f7f95;
+  --copper: #955127;
+  --copper-soft: #fff0e3;
+  --danger: #a1344b;
+  --danger-soft: #fce4e9;
+  --shadow: 0 16px 50px #86546b14;
+  --sidebar: #f5eff9;
+  --tint-peach: #fff0e3;
+  --tint-lilac: #f1eafb;
+  --tint-rose: #fbe8ee;
+  --tint-butter: #fff5d9;
+  --lilac-accent: #79519a;
+  --gold-accent: #976122;
+  --hero-start: #fff1e7;
+  --hero-end: #f3eafa;
+}
+[data-theme="dark"] {
+  --paper: #49334e;
+  --surface: #533f5b;
+  --ink: #fff2f8;
+  --muted: #ddc9d8;
+  --accent-primary: #f4b0be;
+  --accent-soft: #653e53;
+  --stone: #634967;
+  --line: #81697d;
+  --control-line: #b69bb0;
+  --copper: #f2c4a3;
+  --copper-soft: #654832;
+  --danger: #ffc5cf;
+  --danger-soft: #733e55;
+  --sidebar: #402c47;
+  --shadow: 0 16px 50px #38233d33;
+  --tint-peach: #654832;
+  --tint-lilac: #594168;
+  --tint-rose: #653e53;
+  --tint-butter: #5e5031;
+  --lilac-accent: #dfb5ee;
+  --gold-accent: #ead38f;
+  --hero-start: #5c3d50;
+  --hero-end: #513f62;
+}
 .app-shell {
   display: flex;
   min-height: 100vh;
@@ -1907,8 +1958,8 @@
   color: var(--ink);
 }
 .auth-story .brand-mark {
-  background: #9b4935;
-  color: #fffefa;
+  background: var(--accent-primary);
+  color: var(--paper);
 }
 .auth-editorial {
   margin: auto 0;
@@ -3826,4 +3877,117 @@
 }
 [data-theme="dark"] .sidebar-search {
   border-color: var(--control-line);
+}
+
+/* Color marks the kinds of things in a person's day. */
+.dashboard-welcome {
+  padding: 26px 28px;
+  border-radius: 22px;
+  background: linear-gradient(115deg, var(--hero-start), var(--hero-end));
+}
+.date-stamp {
+  min-width: 112px;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--tint-butter);
+}
+.daily-summary > div:nth-child(1) .summary-mark {
+  background: var(--tint-rose);
+  color: var(--accent-primary);
+}
+.daily-summary > div:nth-child(2) .summary-mark {
+  background: var(--tint-lilac);
+  color: var(--lilac-accent);
+}
+.daily-summary > div:nth-child(3) .summary-mark {
+  background: var(--tint-peach);
+  color: var(--copper);
+}
+.daily-rhythm {
+  background: var(--tint-lilac);
+  border-radius: 16px;
+}
+.daily-rhythm .timeline-dot {
+  outline-color: var(--tint-lilac);
+}
+.daily-rhythm .schedule-footer {
+  background: transparent;
+}
+.onboarding {
+  background: var(--tint-peach);
+  border-radius: 16px;
+}
+.accent-forest {
+  --accent: var(--accent-primary);
+  --project-tint: var(--tint-rose);
+}
+.accent-copper {
+  --accent: var(--copper);
+  --project-tint: var(--tint-peach);
+}
+.accent-ink {
+  --accent: var(--lilac-accent);
+  --project-tint: var(--tint-lilac);
+}
+.accent-sage,
+[data-theme="dark"] .accent-sage {
+  --accent: var(--gold-accent);
+  --project-tint: var(--tint-butter);
+}
+.mini-project,
+.project-card {
+  background: var(--project-tint, var(--surface));
+  border-radius: 14px;
+}
+input:not([type="checkbox"]):not([type="range"]),
+select,
+textarea {
+  border-color: var(--control-line);
+}
+.task-check {
+  border-color: var(--control-line);
+}
+.auth-story .illustration-card {
+  background: var(--tint-butter);
+}
+.auth-editorial h1 em {
+  color: var(--accent-primary);
+}
+.nav-link.active {
+  border-radius: 10px;
+}
+@media (max-width: 800px) {
+  .dashboard-welcome {
+    padding: 22px;
+  }
+}
+@media (max-width: 600px) {
+  .dashboard-welcome {
+    padding: 20px 16px;
+    gap: 10px;
+    border-radius: 18px;
+  }
+  .dashboard-welcome h1 {
+    font-size: 34px;
+  }
+  .dashboard-welcome .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  .date-stamp {
+    min-width: 64px;
+    padding: 10px 8px;
+    border-radius: 14px;
+  }
+  .date-stamp span:first-child {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+  .date-stamp span:last-child {
+    font-size: 12px;
+  }
+  .date-stamp strong {
+    font-size: 34px;
+  }
 }
