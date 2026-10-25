@@ -4,25 +4,23 @@ The interface combines editorial headings with a restrained working canvas. Over
 
 ## Foundations
 
-Shared primitives live in `packages/ui/styles.css`; LifeHQ now owns its personal palette in `apps/lifehq/app/styles.css`, while CipherVault owns its separate palette in its app stylesheet. DM Sans is the readable interface face; Newsreader provides editorial headings and occasional italic emphasis. Both are bundled open-source fonts; no remote font requests occur. Lucide supplies consistent outlined icons. Layouts use whitespace, rules, and a small number of raised surfaces rather than uniform cards everywhere.
+Shared primitives live in `packages/ui/styles.css`; LifeHQ owns its palette and typography in `apps/lifehq/app/styles.css`, while CipherVault owns its separate palette. LifeHQ uses locally bundled Manrope for its interface and headings, with 400/500/600/700 weights. CipherVault retains DM Sans. Lucide supplies consistent outlined icons. Layouts use whitespace, rules and a small number of raised surfaces.
 
-| Token | Light | Dark |
+| Token | Daylight | Moonlight |
 | --- | --- | --- |
-| Paper | `#fffcf8` | `#49334e` |
-| Surface | `#fffefa` | `#533f5b` |
-| Ink | `#593c55` | `#fff2f8` |
-| Muted text | `#73566b` | `#ddc9d8` |
-| Coral accent | `#b34160` | `#f4b0be` |
-| Stone | `#eee4ee` | `#634967` |
-| Apricot accent | `#955127` | `#f2c4a3` |
-| Lilac card | `#f1eafb` | `#594168` |
-| Butter card | `#fff5d9` | `#5e5031` |
+| Paper | `#f7f6f2` | `#393632` |
+| Surface | `#fffefa` | `#45413c` |
+| Ink | `#4b443e` | `#f5f2e9` |
+| Muted text | `#6c6259` | `#d0c9bc` |
+| Action accent | `#a34b1d` | `#edac72` |
+| Stone | `#eae6df` | `#575148` |
+| Sidebar | `#eeece5` | `#35322e` |
 
-LifeHQ's Daylight and Moonlight themes adapt the personal planning principles in [the reference notes](docs/DESIGN_REFERENCES.md). A warm paper canvas, coral actions, and lilac/apricot/butter color groups make the different parts of the day recognizable. The greeting has a sunrise wash; schedule and project surfaces have gentle color and rounded corners. The header toggle changes appearance immediately; Settings supports system appearance. A nonce-authorized bootstrap applies saved appearance before first paint. Account preferences sync the workspace theme; login retains a nonsensitive device preference.
+LifeHQ's Awwwards-inspired direction is documented in [the reference notes](docs/DESIGN_REFERENCES.md). Warm neutrals, simple white working cards and a single warm action color replace pastel fills and gradients. The header toggle changes appearance immediately; Settings supports system appearance. A nonce-authorized bootstrap applies saved appearance before first paint. Account preferences sync the workspace theme; login retains a nonsensitive device preference.
 
 CipherVault owns separate sandstone/ochre tokens, geometric branding, sans-serif headings, and a standalone lock screen. LifeHQ links to a standalone product page that launches the independent web origin. No vault unlock screen, keys, or encrypted records live in LifeHQ.
 
-Interface text is generally 16–18px, secondary labels 14–15px, and editorial panel headings 31px. Mobile layouts reflow around the larger type. Fonts remain locally bundled.
+Interface text is generally 16–18px, secondary labels 14–15px, and panel headings generally 26–31px. Mobile layouts reflow around the larger type. Fonts remain locally bundled.
 
 ## Components and behavior
 
@@ -40,6 +38,6 @@ Focus uses a visible accent outline. Motion is short and limited to state transi
 
 ## Dark-mode refinement
 
-LifeHQ’s Moonlight theme uses plum surfaces with rose, lilac, apricot, and butter accents; CipherVault retains muted stone/champagne tones. Decorative dividers stay quiet; form inputs and secondary actions have a separate higher-contrast control border. Toasts use raised dark surfaces, and the vault prototype notice uses neutral text instead of a large amber band. LifeHQ’s Daylight palette is documented above; the independent CipherVault palette is unchanged by this reference-inspired update.
+LifeHQ’s Moonlight theme uses neutral warm-gray surfaces, cream text and restrained amber accents. Decorative dividers stay quiet; inputs and secondary actions use a higher-contrast control border. CipherVault retains its separate stone/champagne palette. Toasts use raised dark surfaces.
 
 Visual verification includes empty and populated Overview screens, the vault setup, a selected dummy record, and the edit dialog at desktop and mobile sizes. The vault palette remains distinct from LifeHQ.

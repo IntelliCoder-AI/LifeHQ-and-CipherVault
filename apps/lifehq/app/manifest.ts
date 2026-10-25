@@ -6,8 +6,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "A thoughtful space for your days, ideas, and ambitions.",
     start_url: "/workspace",
     display: "standalone",
-    background_color: "#fffcf8",
-    theme_color: "#b34160",
+    background_color: "#f7f6f2",
+    theme_color: "#a34b1d",
     icons: [
       { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
     ],

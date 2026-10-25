@@ -69,3 +69,6 @@ A six-section local Chromium sequence previously triggered six server-component 
 The auth routing regression tests assert that public pages and API routes skip middleware session work while protected workspace pages still reject an unverified identity. Each data API retains its own authenticated check. Browser coverage includes the theme toggle on login and workspace, persistence across reload, system theme changes, the independent CipherVault page, and absence of localhost launch links. CipherVault setup is scanned in both themes.
 
 The latest security advisor reported leaked-password protection disabled. No paid Auth setting was enabled. This does not change the existing prototype-only vault restriction.
+
+
+25 October 2026 — Awwwards-informed LifeHQ palette and Manrope typography: optimized build, ESLint and six focused Playwright checks passed (responsive 1440/768/390, major sections and editor in both themes, signup confirmation/visibility, theme persistence/system mode). Fourteen dedicated visual captures cover Overview, Projects and auth; Overview and Projects pass focused contrast/overflow scans. The initial muted badge contrast failure was fixed, then the complete focused set was rerun successfully. This styling update does not resolve the previously documented hosted Auth/inbox acceptance limitation.

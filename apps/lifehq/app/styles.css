@@ -1,53 +1,59 @@
-/* Personal planner palette, adapted from Tiimo, Structured and TeuxDeux. */
+/* Restrained editorial direction informed by Awwwards references. */
+@import "@fontsource/manrope/latin-400.css";
+@import "@fontsource/manrope/latin-500.css";
+@import "@fontsource/manrope/latin-600.css";
+@import "@fontsource/manrope/latin-700.css";
 :root {
-  --paper: #fffcf8;
+  --paper: #f7f6f2;
   --surface: #fffefa;
-  --ink: #593c55;
-  --muted: #73566b;
-  --accent-primary: #b34160;
-  --accent-soft: #fbe8ee;
-  --stone: #eee4ee;
-  --line: #dfcfdf;
-  --control-line: #9f7f95;
-  --copper: #955127;
-  --copper-soft: #fff0e3;
-  --danger: #a1344b;
-  --danger-soft: #fce4e9;
-  --shadow: 0 16px 50px #86546b14;
-  --sidebar: #f5eff9;
-  --tint-peach: #fff0e3;
-  --tint-lilac: #f1eafb;
-  --tint-rose: #fbe8ee;
-  --tint-butter: #fff5d9;
-  --lilac-accent: #79519a;
-  --gold-accent: #976122;
-  --hero-start: #fff1e7;
-  --hero-end: #f3eafa;
+  --ink: #4b443e;
+  --muted: #6c6259;
+  --accent-primary: #a34b1d;
+  --accent-soft: #f2e8dc;
+  --stone: #eae6df;
+  --line: #d9d3ca;
+  --control-line: #9a8d7e;
+  --copper: #88551f;
+  --copper-soft: #f2e8d6;
+  --danger: #a02e19;
+  --danger-soft: #f8e6dd;
+  --shadow: 0 16px 50px #544b3e0d;
+  --sidebar: #eeece5;
+  --warm-panel: #f1ece3;
+  --neutral-panel: #efede8;
+  --ochre-accent: #856323;
+  --stone-accent: #73695e;
 }
 [data-theme="dark"] {
-  --paper: #49334e;
-  --surface: #533f5b;
-  --ink: #fff2f8;
-  --muted: #ddc9d8;
-  --accent-primary: #f4b0be;
-  --accent-soft: #653e53;
-  --stone: #634967;
-  --line: #81697d;
-  --control-line: #b69bb0;
-  --copper: #f2c4a3;
-  --copper-soft: #654832;
-  --danger: #ffc5cf;
-  --danger-soft: #733e55;
-  --sidebar: #402c47;
-  --shadow: 0 16px 50px #38233d33;
-  --tint-peach: #654832;
-  --tint-lilac: #594168;
-  --tint-rose: #653e53;
-  --tint-butter: #5e5031;
-  --lilac-accent: #dfb5ee;
-  --gold-accent: #ead38f;
-  --hero-start: #5c3d50;
-  --hero-end: #513f62;
+  --paper: #393632;
+  --surface: #45413c;
+  --ink: #f5f2e9;
+  --muted: #d0c9bc;
+  --accent-primary: #edac72;
+  --accent-soft: #55483a;
+  --stone: #575148;
+  --line: #71695e;
+  --control-line: #b0a596;
+  --copper: #e2bf87;
+  --copper-soft: #544b39;
+  --danger: #ffc0a4;
+  --danger-soft: #624437;
+  --shadow: 0 16px 50px #302b241f;
+  --sidebar: #35322e;
+  --warm-panel: #48423a;
+  --neutral-panel: #413d38;
+  --ochre-accent: #e2c482;
+  --stone-accent: #d1c4b2;
+}
+body {
+  font-family: "Manrope", sans-serif;
+}
+h1,
+h2,
+.display {
+  font-family: "Manrope", sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.045em;
 }
 .app-shell {
   display: flex;
@@ -101,7 +107,7 @@
   place-items: center;
   background: var(--surface);
   border-radius: 7px;
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 23px;
 }
 .workspace-label strong {
@@ -129,7 +135,7 @@
 .sidebar-search kbd {
   margin-left: auto;
   font:
-    12px "DM Sans",
+    12px "Manrope",
     sans-serif;
   border: 1px solid var(--line);
   padding: 0 4px;
@@ -224,7 +230,7 @@
   border-radius: 50%;
   background: var(--copper-soft);
   color: var(--copper);
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 22px;
 }
 .profile-button strong {
@@ -354,7 +360,7 @@
 }
 .date-stamp strong {
   display: block;
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 42px;
   font-weight: 400;
   line-height: 1.2;
@@ -436,7 +442,7 @@
   border-bottom: 1px solid var(--line);
 }
 .priority-index {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 17px;
   color: var(--muted);
   width: 27px;
@@ -616,7 +622,7 @@
   margin: auto;
 }
 .schedule-empty p {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 28px;
   color: var(--ink);
   margin-top: 14px;
@@ -644,7 +650,7 @@
   transform: translateY(-3px);
 }
 .mini-project-symbol {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 20px;
   color: var(--accent);
 }
@@ -658,7 +664,7 @@
   color: var(--ink);
 }
 .mini-project h3 {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-weight: 400;
   font-size: 22px;
   line-height: 1.15;
@@ -857,7 +863,7 @@
   justify-content: center;
   gap: 16px;
   margin: 36px 0 4px;
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-style: italic;
   font-size: 17px;
   color: var(--muted);
@@ -1075,7 +1081,7 @@
   align-items: center;
 }
 .project-number {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 32px;
   color: var(--accent);
 }
@@ -1394,11 +1400,11 @@
   height: 80px;
   border-radius: 50%;
   padding-top: 26px;
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 33px;
 }
 .goal-ring small {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: 13px;
 }
 .goal-card > .between .subtle {
@@ -1537,7 +1543,7 @@
   text-align: center;
 }
 .habit-streak strong {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 31px;
   font-weight: 400;
   display: block;
@@ -1560,7 +1566,7 @@
   padding: 22px 0;
 }
 .habit-footnote p {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 27px;
   color: var(--muted);
   line-height: 1.45;
@@ -1604,7 +1610,7 @@
 }
 .mini-stats strong {
   display: block;
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 32px;
   font-weight: 400;
 }
@@ -1661,7 +1667,7 @@
   margin: 0;
 }
 .note-preview h3 {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 23px;
   font-weight: 400;
   margin: 10px 0 8px;
@@ -1711,7 +1717,7 @@
   font-size: 12px;
 }
 .note-title-input {
-  font-family: "Newsreader", serif !important;
+  font-family: "Manrope", sans-serif !important;
   font-size: 37px !important;
   line-height: 1.15 !important;
   border: 0 !important;
@@ -1771,7 +1777,7 @@
   border: 0;
 }
 .analytics-stats strong {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 49px;
   font-weight: 400;
   line-height: 1.2;
@@ -2035,7 +2041,7 @@
   color: var(--muted);
 }
 .illustration-card .row {
-  font-family: "Newsreader", serif;
+  font-family: "Manrope", sans-serif;
   font-size: 23px;
   margin-top: 13px;
 }
@@ -3656,7 +3662,7 @@
   color: var(--muted);
 }
 .cipher-product h1 {
-  font-family: "DM Sans", sans-serif;
+  font-family: "Manrope", sans-serif;
   font-size: clamp(44px, 5vw, 72px);
   font-weight: 500;
   line-height: 1.08;
@@ -3746,7 +3752,7 @@
 }
 .cipher-feature-grid h2 {
   font:
-    500 20px/1.4 "DM Sans",
+    500 20px/1.4 "Manrope",
     sans-serif;
   letter-spacing: -0.4px;
   margin: 22px 0 12px;
@@ -3879,66 +3885,67 @@
   border-color: var(--control-line);
 }
 
-/* Color marks the kinds of things in a person's day. */
+/* A quiet working canvas; accent color marks actions and small details. */
 .dashboard-welcome {
-  padding: 26px 28px;
-  border-radius: 22px;
-  background: linear-gradient(115deg, var(--hero-start), var(--hero-end));
+  padding: 12px 0 28px;
+  border-radius: 0;
+  background: transparent;
 }
 .date-stamp {
   min-width: 112px;
   padding: 14px 16px;
   border: 0;
-  border-radius: 18px;
-  background: var(--tint-butter);
+  border-left: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
 }
 .daily-summary > div:nth-child(1) .summary-mark {
-  background: var(--tint-rose);
+  background: var(--accent-soft);
   color: var(--accent-primary);
 }
 .daily-summary > div:nth-child(2) .summary-mark {
-  background: var(--tint-lilac);
-  color: var(--lilac-accent);
+  background: var(--neutral-panel);
+  color: var(--stone-accent);
 }
 .daily-summary > div:nth-child(3) .summary-mark {
-  background: var(--tint-peach);
+  background: var(--warm-panel);
   color: var(--copper);
 }
 .daily-rhythm {
-  background: var(--tint-lilac);
-  border-radius: 16px;
+  background: var(--surface);
+  border-radius: 10px;
 }
 .daily-rhythm .timeline-dot {
-  outline-color: var(--tint-lilac);
+  outline-color: var(--surface);
 }
 .daily-rhythm .schedule-footer {
   background: transparent;
 }
 .onboarding {
-  background: var(--tint-peach);
-  border-radius: 16px;
+  background: var(--warm-panel);
+  border-radius: 10px;
 }
 .accent-forest {
   --accent: var(--accent-primary);
-  --project-tint: var(--tint-rose);
+  --project-tint: var(--surface);
 }
 .accent-copper {
   --accent: var(--copper);
-  --project-tint: var(--tint-peach);
+  --project-tint: var(--surface);
 }
 .accent-ink {
-  --accent: var(--lilac-accent);
-  --project-tint: var(--tint-lilac);
+  --accent: var(--stone-accent);
+  --project-tint: var(--surface);
 }
 .accent-sage,
 [data-theme="dark"] .accent-sage {
-  --accent: var(--gold-accent);
-  --project-tint: var(--tint-butter);
+  --accent: var(--ochre-accent);
+  --project-tint: var(--surface);
 }
 .mini-project,
 .project-card {
   background: var(--project-tint, var(--surface));
-  border-radius: 14px;
+  border-radius: 10px;
 }
 input:not([type="checkbox"]):not([type="range"]),
 select,
@@ -3949,7 +3956,7 @@ textarea {
   border-color: var(--control-line);
 }
 .auth-story .illustration-card {
-  background: var(--tint-butter);
+  background: var(--warm-panel);
 }
 .auth-editorial h1 em {
   color: var(--accent-primary);
@@ -3959,14 +3966,14 @@ textarea {
 }
 @media (max-width: 800px) {
   .dashboard-welcome {
-    padding: 22px;
+    padding: 12px 0 24px;
   }
 }
 @media (max-width: 600px) {
   .dashboard-welcome {
-    padding: 20px 16px;
+    padding: 8px 0 20px;
     gap: 10px;
-    border-radius: 18px;
+    border-radius: 0;
   }
   .dashboard-welcome h1 {
     font-size: 34px;
@@ -3978,7 +3985,7 @@ textarea {
   .date-stamp {
     min-width: 64px;
     padding: 10px 8px;
-    border-radius: 14px;
+    border-radius: 0;
   }
   .date-stamp span:first-child {
     font-size: 12px;
@@ -3990,4 +3997,64 @@ textarea {
   .date-stamp strong {
     font-size: 34px;
   }
+}
+
+/* Consistent sans-serif hierarchy across working screens and authentication. */
+.dashboard-welcome h1 {
+  font-weight: 600;
+  line-height: 1.12;
+}
+.dashboard-section > .section-heading h2,
+.daily-rhythm .section-heading h2,
+.onboarding h2 {
+  font-size: 26px;
+  line-height: 1.25;
+}
+.project-open h2 {
+  font-size: 28px;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.date-stamp strong {
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+.eyebrow,
+.nav-label {
+  letter-spacing: 0.12em;
+}
+.demo-banner {
+  background: var(--neutral-panel);
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.auth-editorial h1 {
+  font-weight: 600;
+  line-height: 1.06;
+}
+.auth-editorial h1 em {
+  font-weight: 600;
+  font-style: normal;
+}
+.nav-link.active {
+  border-radius: 6px;
+}
+@media (max-width: 600px) {
+  .dashboard-section > .section-heading h2,
+  .daily-rhythm .section-heading h2,
+  .onboarding h2 {
+    font-size: 23px;
+  }
+  .auth-editorial h1 {
+    font-size: 42px;
+  }
+}
+
+.empty h3,
+.modal-title {
+  font-family: "Manrope", sans-serif;
+  font-weight: 600;
+}
+.modal-overlay {
+  background: #514a40bd;
 }

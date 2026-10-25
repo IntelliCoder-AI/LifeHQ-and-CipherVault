@@ -35,7 +35,7 @@ Dark-mode detail review (sample/dummy records only):
 - [Vault selected record](screenshots/vault-detail-dark-1440.png) · [Tablet](screenshots/vault-detail-dark-768.png) · [Mobile](screenshots/vault-detail-dark-390.png)
 - [Vault editor](screenshots/vault-editor-dark-1440.png) · [Mobile](screenshots/vault-editor-dark-390.png)
 
-Reference-inspired personal palette (sample records only):
+Previous personal palette, superseded by the editorial captures below (sample records only):
 
 - Overview: [Daylight desktop](screenshots/personal-overview-light-1440.png) · [Tablet](screenshots/personal-overview-light-768.png) · [Mobile](screenshots/personal-overview-light-390.png)
 - Overview: [Moonlight desktop](screenshots/personal-overview-dark-1440.png) · [Tablet](screenshots/personal-overview-dark-768.png) · [Mobile](screenshots/personal-overview-dark-390.png)
@@ -44,3 +44,12 @@ Reference-inspired personal palette (sample records only):
 - Signup mobile: [Daylight](screenshots/personal-signup-light-390.png) · [Moonlight](screenshots/personal-signup-dark-390.png)
 
 See [the source references and adaptation notes](DESIGN_REFERENCES.md).
+
+
+Awwwards-informed editorial palette, 25 October 2026 (sample records only):
+
+- Overview: [Daylight](screenshots/editorial-overview-light-1440.png) · [Tablet](screenshots/editorial-overview-light-768.png) · [Mobile](screenshots/editorial-overview-light-390.png)
+- Overview: [Moonlight](screenshots/editorial-overview-dark-1440.png) · [Tablet](screenshots/editorial-overview-dark-768.png) · [Mobile](screenshots/editorial-overview-dark-390.png)
+- Projects: [Daylight](screenshots/editorial-projects-light-1440.png) · [Mobile](screenshots/editorial-projects-light-390.png) · [Moonlight](screenshots/editorial-projects-dark-1440.png) · [Mobile](screenshots/editorial-projects-dark-390.png)
+- Login: [Daylight](screenshots/editorial-login-light-1440.png) · [Moonlight](screenshots/editorial-login-dark-1440.png)
+- Signup mobile: [Daylight](screenshots/editorial-signup-light-390.png) · [Moonlight](screenshots/editorial-signup-dark-390.png)

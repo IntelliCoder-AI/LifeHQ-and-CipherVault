@@ -1,19 +1,18 @@
-# Personal planner visual references
+# LifeHQ visual references
 
-Reviewed 2026-10-23 for LifeHQ's personal color direction. These are references for visual principles; LifeHQ does not copy their branding, assets, or layouts.
+Reviewed 25 October 2026. The current direction follows the user's Awwwards reference and replaces the earlier coral/lilac personal-planner palette.
 
-| Reference | Official source | Principle adapted in LifeHQ |
+| Reference | Source | Principle adapted |
 | --- | --- | --- |
-| Tiimo | https://www.tiimoapp.com/product | Give routines and tasks recognizable, gentle color groups instead of covering the whole workspace in one hue. |
-| Structured | https://structured.app/ | Use a friendly personal timeline, soft color blocks, and warm accents to make the day feel approachable. |
-| TeuxDeux | https://teuxdeux.com/ | Keep the working canvas paper-like and let the task content stay clear and simple. |
+| Electronic Materials Office | https://www.awwwards.com/sites/electronic-materials-office | A small neutral palette, one warm accent, minimal surfaces and typography-led hierarchy. Awwwards lists white and #DF6C4F alongside black; LifeHQ uses a darker burnt orange for readable controls and warm stone instead of black. |
+| INFINI | https://www.awwwards.com/sites/infini | Clear typography and restrained layout; the Awwwards listing highlights minimal design and a simple typographic search. |
 
-Research used the official product pages and their publicly indexed product-image descriptions. Direct reference-site and CDN capture was blocked by the managed network proxy, so these are adapted design decisions, not sampled brand hex values or claims of pixel fidelity.
+The Awwwards home page timed out through the research tool. Research therefore used its published project listings and linked reference imagery. These are design principles adapted for a working planner, not an exact reproduction or a claim that LifeHQ has won an award. No reference assets or proprietary fonts are bundled.
 
 ## Applied direction
 
-LifeHQ's Daylight theme pairs a warm white canvas with coral actions, lilac scheduling, apricot project cards, and butter-yellow highlights. Headings use plum text for readable contrast. Moonlight uses corresponding plum surfaces and the same color families at accessible luminance levels. Saved project color IDs remain compatible; displayed labels now read Coral, Apricot, Lilac, and Butter.
+Daylight uses warm white (#f7f6f2), a stone sidebar, brown-gray text (#4b443e), white working cards and a burnt-orange action accent (#a34b1d). There are no pink/lilac surfaces, multicolor project fills or sunrise gradient. Moonlight uses neutral warm-gray surfaces with cream text and an amber accent, without the previous purple or brown wash.
 
-The greeting uses a soft sunrise color wash. Small summary icons and project surfaces express the different parts of the day. Existing navigation, typography, data, and light/dark controls remain in place. CipherVault retains its independent visual identity.
+Manrope replaces the serif headings and the previous interface font throughout LifeHQ. Its open-source fonts are bundled locally in four Latin weights. Headings use a deliberate 600 weight, tighter spacing and a clear scale; working text retains the existing readable sizing. CipherVault retains its independent palette and identity.
 
-Reference assets are linked for research only and are not bundled into either app. The deployed interface continues to load its own bundled fonts and assets.
+Persisted project color IDs remain compatible; labels are Ember, Copper, Stone and Ochre. Project color stays in the thin accent line and progress indicators rather than tinting the whole card. Existing light/dark controls, navigation, records and authentication behavior are preserved.
