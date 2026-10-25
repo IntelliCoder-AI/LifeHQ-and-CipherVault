@@ -19,7 +19,14 @@ export async function POST(
     if (!user) return json({ error: "Please sign in again." }, 401);
     const input = z
       .object({
-        action: z.enum(["save", "delete", "bulk"]),
+        action: z.enum([
+          "save",
+          "delete",
+          "delete_now",
+          "undo",
+          "finalize",
+          "bulk",
+        ]),
         id: z.uuid().optional(),
         version: z.number().int().positive().optional(),
         values: z.unknown().optional(),
@@ -28,6 +35,36 @@ export async function POST(
       })
       .strict()
       .parse(await body(request));
+    if (input.action === "undo") {
+      if (!input.id) throw new Error("Missing deletion ID");
+      const { error } = await db.rpc("undo_record_deletion", {
+        deletion_id: input.id,
+      });
+      if (error) throw error;
+      return json({ ok: true });
+    }
+    if (input.action === "delete") {
+      if (!input.id || !input.version)
+        throw new Error("Missing record version");
+      const { data, error } = await db.rpc("schedule_record_deletion", {
+        entity: table,
+        record_id: input.id,
+        record_version: input.version,
+      });
+      if (error) throw error;
+      return json({ deletion: data });
+    }
+    if (input.action === "delete_now" && table !== "habit_entries")
+      throw new Error(
+        "Immediate deletion is only for toggling a habit check-in.",
+      );
+    if (input.action === "finalize") {
+      const { data: conflicts, error } = await db.rpc(
+        "finalize_record_deletions",
+      );
+      if (error) throw error;
+      return json({ ok: true, conflicts });
+    }
     if (input.action === "bulk") {
       if (table !== "tasks" || !input.ids || !input.status)
         throw new Error("Invalid bulk action");
@@ -43,7 +80,7 @@ export async function POST(
       if (error) throw error;
       return json({ ok: true });
     }
-    if (input.action === "delete") {
+    if (input.action === "delete_now") {
       if (!input.id || !input.version)
         throw new Error("Missing record version");
       const { data, error } = await db

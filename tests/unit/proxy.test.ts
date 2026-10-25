@@ -48,6 +48,21 @@ describe("auth routing and session work", () => {
       "http://localhost:3000/login",
     );
   });
+  it("starts production auth on the canonical origin to preserve PKCE cookies", async () => {
+    vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://lifehq-three.vercel.app");
+    for (const environment of ["production", "preview"]) {
+      vi.stubEnv("VERCEL_ENV", environment);
+      const response = await proxy(
+        new NextRequest(
+          "https://old-alias.example/login?notice=account-deleted",
+        ),
+      );
+      expect(response.headers.get("location")).toBe(
+        "https://lifehq-three.vercel.app/login?notice=account-deleted",
+      );
+    }
+    expect(create).not.toHaveBeenCalled();
+  });
   it("a verified session may enter the workspace", async () => {
     claims.mockResolvedValue({ data: { claims: { sub: "dummy-user" } } });
     const response = await proxy(

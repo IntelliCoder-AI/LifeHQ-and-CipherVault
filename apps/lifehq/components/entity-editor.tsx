@@ -632,8 +632,8 @@ export function DeleteDialog({
       title={`Delete ${entityNames[table]}?`}
       description={
         ["projects", "goals", "habits", "tasks", "events"].includes(table)
-          ? "Linked records and history will also be removed. Export a backup first if you need them."
-          : "This permanently removes the record."
+          ? "This record and its linked records will be permanently removed after a 10-second undo window. Export a backup first if you need one."
+          : "This record will be permanently removed after a 10-second undo window. Export a backup first if you need one."
       }
     >
       <p>{"title" in row ? String(row.title) : "This entry"}</p>
@@ -660,7 +660,7 @@ export function DeleteDialog({
             }
           }}
         >
-          {busy ? "Deleting…" : "Delete permanently"}
+          {busy ? "Deleting…" : "Delete"}
         </Button>
       </div>
     </Modal>

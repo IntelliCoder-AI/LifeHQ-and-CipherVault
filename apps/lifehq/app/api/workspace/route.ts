@@ -10,6 +10,10 @@ export async function GET() {
     } = await db.auth.getUser();
     if (authError || !user)
       return json({ error: "Please sign in again." }, 401);
+    const { data: deletions, error: deletionError } = await db.rpc(
+      "process_record_deletions",
+    );
+    if (deletionError) throw deletionError;
     const profileRequest = db
       .from("profiles")
       .select("preferences")
@@ -40,6 +44,8 @@ export async function GET() {
     if (error) throw error;
     return json({
       data: Object.fromEntries(results),
+      pendingDeletions: deletions.pending,
+      deletionConflicts: deletions.conflicts,
       preferences: preferencesSchema.parse({
         ...defaults,
         name: user.user_metadata.display_name || "Friend",

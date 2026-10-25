@@ -64,6 +64,11 @@ export function VaultAccess() {
             <span className="cipher-launch-note">
               Separate from LifeHQ sign-in. Opens as its own application.
             </span>
+            <span className="cipher-launch-note">
+              Used an older CipherVault address? Export its encrypted backup
+              there, then restore it at this address. Browser vaults do not move
+              between website addresses automatically.
+            </span>
           </div>
           <div className="cipher-emblem" aria-hidden="true">
             <span className="cipher-emblem-ring" />

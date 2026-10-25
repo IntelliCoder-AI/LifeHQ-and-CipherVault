@@ -53,3 +53,6 @@ Awwwards-informed editorial palette, 25 October 2026 (sample records only):
 - Projects: [Daylight](screenshots/editorial-projects-light-1440.png) · [Mobile](screenshots/editorial-projects-light-390.png) · [Moonlight](screenshots/editorial-projects-dark-1440.png) · [Mobile](screenshots/editorial-projects-dark-390.png)
 - Login: [Daylight](screenshots/editorial-login-light-1440.png) · [Moonlight](screenshots/editorial-login-dark-1440.png)
 - Signup mobile: [Daylight](screenshots/editorial-signup-light-390.png) · [Moonlight](screenshots/editorial-signup-dark-390.png)
+
+
+QA feedback release, sample records only: [Undo toast desktop](screenshots/qa-undo-1440.png) · [Undo toast mobile](screenshots/qa-undo-390.png). Habit captures above include the new backfill guidance. Screenshots verify layout, not hosted email delivery or anonymous Vercel access.

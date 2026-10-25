@@ -48,7 +48,19 @@ export function failure(error: unknown) {
 }
 
 export function appOrigin(request: Request) {
-  return process.env.VERCEL_ENV === "preview" && process.env.VERCEL_URL
-    ? `https://${process.env.VERCEL_URL}`
-    : process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  const configured = process.env.NEXT_PUBLIC_APP_URL;
+  const url = new URL(configured || new URL(request.url).origin);
+  if (
+    !["https:", "http:"].includes(url.protocol) ||
+    url.username ||
+    url.password ||
+    url.pathname !== "/" ||
+    url.search ||
+    url.hash ||
+    (process.env.NODE_ENV === "production" &&
+      url.protocol !== "https:" &&
+      !["localhost", "127.0.0.1"].includes(url.hostname))
+  )
+    throw new Error("Configure a valid public application origin.");
+  return url.origin;
 }

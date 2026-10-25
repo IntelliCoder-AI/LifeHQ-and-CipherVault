@@ -7,6 +7,7 @@ import {
   useState,
   useCallback,
   useRef,
+  useMemo,
 } from "react";
 import {
   emptyData,
@@ -20,6 +21,11 @@ import {
   type Row,
   type Values,
 } from "@lifehq/shared";
+import {
+  pendingDeletionList,
+  visibleRecords,
+  type PendingDeletion,
+} from "./deletions";
 import { DEMO_KEY, DEMO_USER, sampleData } from "./demo";
 import { today, type Scheduled } from "@lifehq/shared/dates";
 export type Store = {
@@ -50,6 +56,8 @@ export type Store = {
   toggleScheduled: (item: Scheduled) => Promise<void>;
   toast: (message: string) => void;
   message: string;
+  pendingDeletions: PendingDeletion[];
+  undoDeletion: (id: string) => Promise<void>;
 };
 const Context = createContext<Store | null>(null);
 export const useWorkspace = () => {
@@ -77,17 +85,22 @@ export function WorkspaceProvider({
   children: React.ReactNode;
   demo: boolean;
 }) {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [data, setData] = useState<Data>(emptyData),
     [preferences, setPref] = useState<Preferences>(defaults),
     [loading, setLoading] = useState(true),
     [error, setError] = useState(""),
     [pending, setPending] = useState(0),
+    [pendingDeletions, setPendingDeletions] = useState<PendingDeletion[]>([]),
     [email, setEmail] = useState(""),
     [message, setMessage] = useState("");
-  const snapshot = useRef(data),
+  const themeInitialized = useRef(false),
+    deletionQueue = useRef(pendingDeletions),
+    finalizing = useRef(false),
+    snapshot = useRef(data),
     prefs = useRef(preferences),
     toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  deletionQueue.current = pendingDeletions;
   snapshot.current = data;
   prefs.current = preferences;
   const toast = useCallback((value: string) => {
@@ -96,11 +109,15 @@ export function WorkspaceProvider({
     toastTimer.current = setTimeout(() => setMessage(""), 4500);
   }, []);
   const commit = useCallback(
-    (next: Data, p = prefs.current) => {
+    (next: Data, p = prefs.current, deletions = deletionQueue.current) => {
       if (demo)
         localStorage.setItem(
           DEMO_KEY,
-          JSON.stringify({ data: next, preferences: p }),
+          JSON.stringify({
+            data: next,
+            preferences: p,
+            pendingDeletions: deletions,
+          }),
         );
       snapshot.current = next;
       setData(next);
@@ -115,14 +132,32 @@ export function WorkspaceProvider({
         if (saved) {
           const parsed = JSON.parse(saved);
           setData({ ...emptyData(), ...parsed.data });
+          const queue = pendingDeletionList(parsed.pendingDeletions);
+          deletionQueue.current = queue;
+          setPendingDeletions(queue);
           setPref({ ...defaults, ...parsed.preferences });
+          if (!themeInitialized.current) {
+            themeInitialized.current = true;
+            setTheme(parsed.preferences?.theme || defaults.theme);
+          }
         } else {
           setData(emptyData());
         }
       } else {
         const result = await api("/api/workspace");
         setData(result.data);
+        const queue = pendingDeletionList(result.pendingDeletions);
+        deletionQueue.current = queue;
+        setPendingDeletions(queue);
+        if (result.deletionConflicts?.length)
+          toast(
+            "A record changed before deletion and was kept. Review it before deleting again.",
+          );
         setPref(result.preferences);
+        if (!themeInitialized.current) {
+          themeInitialized.current = true;
+          setTheme(result.preferences.theme);
+        }
         setEmail(result.user.email);
       }
     } catch (e) {
@@ -132,7 +167,7 @@ export function WorkspaceProvider({
     } finally {
       setLoading(false);
     }
-  }, [demo]);
+  }, [demo, setTheme, toast]);
   useEffect(() => {
     void refresh();
   }, [refresh]);
@@ -143,9 +178,7 @@ export function WorkspaceProvider({
     if (demo) window.addEventListener("storage", handler);
     return () => window.removeEventListener("storage", handler);
   }, [demo, refresh]);
-  useEffect(() => {
-    if (!loading) setTheme(preferences.theme);
-  }, [preferences.theme, loading, setTheme]);
+
   const save = useCallback(
     async <T extends Table>(
       table: T,
@@ -218,12 +251,38 @@ export function WorkspaceProvider({
       save(table, { ...cleanValues(table, row), ...patch }, row),
     [save],
   );
+  const setDeletionQueue = useCallback(
+    (queue: PendingDeletion[]) => {
+      if (demo) commit(snapshot.current, prefs.current, queue);
+      deletionQueue.current = queue;
+      setPendingDeletions(queue);
+    },
+    [demo, commit],
+  );
   const remove = useCallback(
     async <T extends Table>(table: T, row: Row<T>) => {
       setPending((n) => n + 1);
       try {
-        if (!demo) {
-          await api(`/api/records/${table}`, {
+        let deletion: PendingDeletion;
+        if (demo) {
+          const existing = snapshot.current[table].find((r) => r.id === row.id);
+          if (!existing || existing.version !== row.version)
+            throw new Error("This record changed. Refresh before deleting.");
+          if (
+            deletionQueue.current.some(
+              (q) => q.record_table === table && q.record_id === row.id,
+            )
+          )
+            return;
+          deletion = {
+            id: crypto.randomUUID(),
+            record_table: table,
+            record_id: row.id,
+            record_version: row.version,
+            expires_at: new Date(Date.now() + 10000).toISOString(),
+          };
+        } else {
+          const result = await api(`/api/records/${table}`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -232,17 +291,97 @@ export function WorkspaceProvider({
               version: row.version,
             }),
           });
-          await refresh();
-        } else {
-          const next = cascadeDelete(snapshot.current, table, row.id);
-          commit(next);
+          deletion = pendingDeletionList([result.deletion])[0];
         }
-        toast("Deleted");
+        setDeletionQueue([
+          ...deletionQueue.current.filter((q) => q.id !== deletion.id),
+          deletion,
+        ]);
       } finally {
         setPending((n) => n - 1);
       }
     },
-    [demo, commit, refresh, toast],
+    [demo, setDeletionQueue],
+  );
+  const undoDeletion = useCallback(
+    async (id: string) => {
+      const item = deletionQueue.current.find((q) => q.id === id);
+      if (!item) return;
+      if (demo) {
+        if (Date.parse(item.expires_at) <= Date.now())
+          throw new Error("The undo window has ended.");
+        setDeletionQueue(deletionQueue.current.filter((q) => q.id !== id));
+      } else {
+        await api(`/api/records/${item.record_table}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "undo", id }),
+        });
+        await refresh();
+      }
+      toast("Deletion undone");
+    },
+    [demo, setDeletionQueue, refresh, toast],
+  );
+  useEffect(() => {
+    if (!pendingDeletions.length || loading) return;
+    let disposed = false;
+    let retryAt = 0;
+    const finalize = async () => {
+      if (finalizing.current || Date.now() < retryAt) return;
+      const expired = deletionQueue.current.filter(
+        (q) => Date.parse(q.expires_at) <= Date.now(),
+      );
+      if (!expired.length) return;
+      finalizing.current = true;
+      try {
+        if (demo) {
+          let next = snapshot.current;
+          let conflict = false;
+          for (const item of expired) {
+            const record = next[item.record_table].find(
+              (r) => r.id === item.record_id,
+            );
+            if (record?.version === item.record_version)
+              next = cascadeDelete(next, item.record_table, item.record_id);
+            else if (record) conflict = true;
+          }
+          const queue = deletionQueue.current.filter(
+            (q) => !expired.some((e) => e.id === q.id),
+          );
+          commit(next, prefs.current, queue);
+          deletionQueue.current = queue;
+          setPendingDeletions(queue);
+          if (conflict) toast("A record changed before deletion and was kept.");
+        } else {
+          const result = await api("/api/records/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "finalize" }),
+          });
+          if (!disposed) await refresh();
+          if (result.conflicts?.length)
+            toast("A record changed before deletion and was kept.");
+        }
+      } catch {
+        retryAt = Date.now() + 5000;
+        toast(
+          "Deletion is still pending. Reconnect and refresh to finish saving it.",
+        );
+      } finally {
+        finalizing.current = false;
+      }
+    };
+    void finalize();
+    const timer = setInterval(() => void finalize(), 250);
+    return () => {
+      disposed = true;
+      clearInterval(timer);
+    };
+  }, [pendingDeletions, loading, demo, commit, refresh, toast]);
+  const displayedData = useMemo(
+    () => visibleRecords(data, pendingDeletions),
+    [data, pendingDeletions],
   );
   const bulk = useCallback(
     async (ids: string[], status: "todo" | "doing" | "done") => {
@@ -281,6 +420,8 @@ export function WorkspaceProvider({
   );
   const setPreferences = useCallback(
     async (p: Preferences) => {
+      themeInitialized.current = true;
+      setTheme(p.theme);
       if (!demo)
         await api("/api/workspace", {
           method: "PATCH",
@@ -292,7 +433,7 @@ export function WorkspaceProvider({
       prefs.current = p;
       toast("Preferences saved");
     },
-    [demo, commit, toast],
+    [demo, commit, toast, setTheme],
   );
   const toggleHabit = useCallback(
     async (habit: Row<"habits">, date: string) => {
@@ -303,10 +444,21 @@ export function WorkspaceProvider({
       const entry = snapshot.current.habit_entries.find(
         (e) => e.habit_id === habit.id && e.date === date,
       );
-      if (entry) await remove("habit_entries", entry);
-      else await save("habit_entries", { habit_id: habit.id, date });
+      if (entry) {
+        if (!demo)
+          await api("/api/records/habit_entries", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "delete_now",
+              id: entry.id,
+              version: entry.version,
+            }),
+          });
+        commit(cascadeDelete(snapshot.current, "habit_entries", entry.id));
+      } else await save("habit_entries", { habit_id: habit.id, date });
     },
-    [save, remove],
+    [save, demo, commit],
   );
   const toggleScheduled = useCallback(
     async (item: Scheduled) => {
@@ -341,8 +493,21 @@ export function WorkspaceProvider({
   return (
     <Context.Provider
       value={{
-        data,
-        preferences,
+        data: displayedData,
+        pendingDeletions: pendingDeletions.map((item) => {
+          const record = data[item.record_table].find(
+            (r) => r.id === item.record_id,
+          );
+          return {
+            ...item,
+            label:
+              record && "title" in record
+                ? String(record.title)
+                : item.record_table.replaceAll("_", " "),
+          };
+        }),
+        undoDeletion,
+        preferences: { ...preferences, theme },
         demo,
         loading,
         error,
@@ -355,11 +520,15 @@ export function WorkspaceProvider({
         bulk,
         setPreferences,
         loadSamples: () => {
-          commit(sampleData());
+          deletionQueue.current = [];
+          setPendingDeletions([]);
+          commit(sampleData(), prefs.current, []);
           toast("Sample data loaded — local demo only");
         },
         clearDemo: () => {
-          commit(emptyData());
+          deletionQueue.current = [];
+          setPendingDeletions([]);
+          commit(emptyData(), prefs.current, []);
           toast("Demo cleared");
         },
         toggleHabit,

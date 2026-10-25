@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTheme } from "@lifehq/ui/theme";
 import { useRouter } from "next/navigation";
 import {
   ResponsiveContainer,
@@ -415,6 +416,7 @@ export function AnalyticsPage({ remove }: { remove: RemoveRequest }) {
   );
 }
 export function SettingsPage() {
+  const { theme } = useTheme();
   const {
     data,
     preferences,
@@ -439,7 +441,7 @@ export function SettingsPage() {
     setBusy(true);
     setError("");
     try {
-      await setPreferences(draft);
+      await setPreferences({ ...draft, theme });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to save settings");
     } finally {
@@ -473,10 +475,19 @@ export function SettingsPage() {
           <div className="form-grid">
             <Field label="Appearance">
               <select
-                value={draft.theme}
-                onChange={(e) =>
-                  change("theme", e.target.value as Preferences["theme"])
-                }
+                value={theme}
+                onChange={(e) => {
+                  void setPreferences({
+                    ...preferences,
+                    theme: e.target.value as Preferences["theme"],
+                  }).catch((e) =>
+                    toast(
+                      e instanceof Error
+                        ? e.message
+                        : "Theme could not be synced.",
+                    ),
+                  );
+                }}
               >
                 <option value="light">Daylight</option>
                 <option value="dark">Moonlight</option>
@@ -723,7 +734,7 @@ export function SettingsPage() {
                 });
                 const r = await res.json();
                 if (!res.ok) throw new Error(r.error);
-                router.push("/login");
+                router.replace("/login?notice=account-deleted");
                 router.refresh();
               } catch (e) {
                 setError(

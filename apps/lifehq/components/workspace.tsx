@@ -137,6 +137,8 @@ function Shell() {
     busy,
     toast,
     message,
+    pendingDeletions,
+    undoDeletion,
     setPreferences,
   } = useWorkspace();
   const pathname = usePathname(),
@@ -570,11 +572,73 @@ function Shell() {
       {deletion && (
         <DeleteDialog {...deletion} onClose={() => setDeletion(null)} />
       )}
-      {message && (
-        <div className="toast" role="status">
-          {message}
-        </div>
-      )}
+      <div className="workspace-feedback">
+        {pendingDeletions.map((item) => (
+          <DeletionNotice
+            key={item.id}
+            item={item}
+            undo={() => undoDeletion(item.id)}
+            toast={toast}
+          />
+        ))}
+        {message && (
+          <div className="toast" role="status">
+            {message}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+function DeletionNotice({
+  item,
+  undo,
+  toast,
+}: {
+  item: { label?: string; expires_at: string };
+  undo: () => Promise<void>;
+  toast: (message: string) => void;
+}) {
+  const [now, setNow] = useState(() => Date.now());
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(timer);
+  }, []);
+  const remaining = Math.max(
+    0,
+    Math.ceil((Date.parse(item.expires_at) - now) / 1000),
+  );
+  return (
+    <div className="toast undo-toast" role="status">
+      <span>
+        {remaining ? (
+          <>
+            Deleting {item.label || "record"}.{" "}
+            <span aria-hidden="true">{remaining}s</span>
+            <span className="sr-only">You have ten seconds to undo.</span>
+          </>
+        ) : (
+          <>Finishing deletion of {item.label || "record"}…</>
+        )}
+      </span>
+      <Button
+        variant="secondary"
+        size="sm"
+        disabled={busy || !remaining}
+        aria-label={`Undo deletion of ${item.label || "record"}`}
+        onClick={async () => {
+          setBusy(true);
+          try {
+            await undo();
+          } catch (e) {
+            toast(e instanceof Error ? e.message : "Could not undo deletion.");
+            setBusy(false);
+          }
+        }}
+      >
+        Undo
+      </Button>
     </div>
   );
 }

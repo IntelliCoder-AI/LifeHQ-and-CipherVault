@@ -69,7 +69,7 @@ test("task lifecycle persists and updates the dashboard", async ({ page }) => {
   await page
     .getByRole("button", { name: "Delete A thoughtful next step", exact: true })
     .click();
-  await submit(page, "Delete permanently");
+  await submit(page, "Delete");
   await expect(
     page.getByText("A thoughtful next step", { exact: true }),
   ).toHaveCount(0);
@@ -409,8 +409,12 @@ test("recurring tasks complete one occurrence and expose completed history; even
     .getByRole("button", { name: /A temporary meeting.*30 min/ })
     .click();
   await page.getByRole("button", { name: "Delete event", exact: true }).click();
-  await submit(page, "Delete permanently");
-  expect((await stored(page)).data.events).toHaveLength(0);
+  await submit(page, "Delete");
+  await expect
+    .poll(async () => (await stored(page)).data.events.length, {
+      timeout: 15000,
+    })
+    .toBe(0);
 });
 
 test("authentication form retains input and recovers from network and service errors", async ({
@@ -682,6 +686,12 @@ test("Overview customization moves and hides its sections, and CipherVault is al
     .locator(".sidebar nav")
     .getByRole("link", { name: "Overview", exact: false })
     .click();
+  await expect(
+    page.getByRole("heading", { name: "From your notebook", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Your daily rituals", exact: true }),
+  ).toBeVisible();
   const titles = await page
     .locator(".dashboard-grid > section > .section-heading h2")
     .allTextContents();
@@ -707,7 +717,7 @@ test("Overview customization moves and hides its sections, and CipherVault is al
   await expect(companion.locator("a[href*='localhost']")).toHaveCount(0);
   await expect(
     companion.getByRole("link", { name: "Open CipherVault", exact: false }),
-  ).toHaveAttribute("href", "https://ciphervault-radhe12.vercel.app");
+  ).toHaveAttribute("href", "https://ciphervault-orpin.vercel.app");
   await expect(
     companion.getByRole("link", { name: "Open CipherVault", exact: false }),
   ).toHaveAttribute("target", "_blank");
@@ -745,12 +755,16 @@ test("theme toggle works from login and workspace, persists, and follows system 
   await page
     .getByRole("button", { name: "Explore sample workspace", exact: true })
     .click();
-  await page.getByRole("switch", { name: "Dark theme", exact: true }).click();
-  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await page.reload();
+  // Entering a new demo preserves the appearance selected on the login page.
   await expect(
     page.getByRole("switch", { name: "Dark theme", exact: true }),
   ).toBeChecked();
+  await page.getByRole("switch", { name: "Dark theme", exact: true }).click();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.reload();
+  await expect(
+    page.getByRole("switch", { name: "Dark theme", exact: true }),
+  ).not.toBeChecked();
   await page.goto("/demo/settings");
   await page.getByLabel("Appearance").selectOption("system");
   await page

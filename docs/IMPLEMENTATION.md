@@ -34,7 +34,7 @@ Screenshots in `docs/screenshots` are real browser captures with opt-in demo or 
 ## Published artifacts
 
 - Repository: https://github.com/IntelliCoder-AI/LifeHQ-and-CipherVault — branch `main`.
-- LifeHQ: https://lifehq-radhe12.vercel.app — [local demo](https://lifehq-radhe12.vercel.app/demo), additional alias https://lifehq-three.vercel.app.
+- LifeHQ: https://lifehq-three.vercel.app — [local demo](https://lifehq-three.vercel.app/demo), canonical project domain.
 - Supabase: **LifeHQ**, project `vcxxhpglhfkdxliwieao`, in **Anurag**, verified Free plan; both migrations applied. Existing unrelated app data untouched.
 - Vercel: **Radhe / radhe12**, verified Hobby. Source uploaded through Vercel's file API. The GitHub integration rejected repository linking; no automatic Git deployments are configured.
 - CipherVault: independent web-hosted development prototype, also available locally on port 3001. No cloud data store or account integration; encrypted vault contents remain in browser IndexedDB.
@@ -64,7 +64,7 @@ CipherVault's required prototype workflows are implemented and tested. It remain
 - CipherVault has its own branding, geometric presentation, standalone product page, and separate Vercel project. The production launcher uses a verified HTTPS origin instead of localhost. Hosting serves the interface; vault records remain local-only.
 - Automatic review rejected removing Vercel SSO protection; that access setting was retained. No paid services or cloud vault storage were enabled.
 
-CipherVault interface: https://ciphervault-radhe12.vercel.app — a separate browser-local prototype. The production root returned HTTP 200 through the Vercel connector, with its restrictive CSP and prototype label. This does not establish an independent crypto audit or complete hosted browser verification.
+CipherVault interface: https://ciphervault-orpin.vercel.app — a separate browser-local prototype. The production root returned HTTP 200 through the Vercel connector, with its restrictive CSP and prototype label. This does not establish an independent crypto audit or complete hosted browser verification.
 
 ## Dark-mode visual refinement
 
@@ -82,3 +82,10 @@ Validation before publication: optimized LifeHQ build and ESLint passed. Six exi
 The earlier personal-planner colors are replaced by a restrained warm-white/stone canvas and burnt-orange controls. Manrope replaces LifeHQ's serif headings and interface type; all four weights are bundled locally. Project cards and the schedule use neutral working surfaces, and the greeting has no pastel gradient. Moonlight uses warm-gray surfaces and cream text. Saved project IDs, themes, records and behavior remain compatible. CipherVault's app remains independent.
 
 Validation: the optimized LifeHQ build and ESLint pass. Six focused Playwright checks pass, covering ten major sections in both themes, the editor, signup/visibility, theme persistence and responsive layouts at 1440/768/390. Fourteen additional visual captures cover Overview, Projects and authentication. The Overview/Projects scans pass contrast and overflow checks in both modes; the font check confirms Manrope loads. An initial 4.43:1 muted-label contrast issue was corrected before the final checks. Reference details and limitations are in DESIGN_REFERENCES.md. Full hosted auth/inbox acceptance remains a separate unresolved check.
+
+
+## QA defect release — 25 October 2026
+
+See [QA_FIXES.md](QA_FIXES.md) for the defect-by-defect behavior and external acceptance limits. Production addresses are `https://lifehq-three.vercel.app` and `https://ciphervault-orpin.vercel.app`, supplied through environment variables. The owner confirmed the Supabase Site URL and both callback Redirect URLs for LifeHQ. Confirm email is unchanged pending a fresh delivered-link test. CipherVault uses Vercel Standard Protection so its production project domain is public while previews/deployment URLs remain protected. Existing origin-bound vault records require encrypted backup transfer if moving from an older hostname.
+
+The pending-deletion queue and explicit anonymous-RPC revocation migrations are applied in Supabase. Metadata checks verify RLS, an owner policy, security-invoker functions with empty search paths, authenticated execution and no anonymous execution. No new security advisories were introduced; the existing leaked-password-protection advisory remains. Validation totals and targeted reruns are recorded in TESTING.md.

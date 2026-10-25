@@ -340,6 +340,18 @@ export function GoalsPage({
     </div>
   );
 }
+function checkInUnavailable(
+  habit: Row<"habits">,
+  date: string,
+  current: string,
+) {
+  if (date < habit.start_date)
+    return `This habit starts on ${habit.start_date}.`;
+  if (date > current) return "Future dates cannot be checked in yet.";
+  if (!habitScheduled(habit, date))
+    return "This day is outside your habit schedule. Edit the habit to change its scheduled days.";
+  return "";
+}
 export function HabitsPage({
   edit,
   remove,
@@ -457,15 +469,26 @@ export function HabitsPage({
                     const done = data.habit_entries.some(
                         (e) => e.habit_id === h.id && e.date === d,
                       ),
-                      enabled = habitScheduled(h, d) && d <= current;
+                      reason = checkInUnavailable(h, d, current),
+                      enabled = !reason;
                     return (
                       <button
                         key={d}
                         className={`habit-check ${done ? "checked" : ""} ${d === current ? "today" : ""}`}
-                        disabled={!enabled || pending === h.id + d}
+                        aria-disabled={!enabled || pending === h.id + d}
+                        aria-describedby="habit-checkin-help"
+                        title={
+                          reason ||
+                          (done
+                            ? "Remove check-in"
+                            : "Record or backfill this day")
+                        }
                         aria-label={`${h.title} on ${d}`}
                         aria-pressed={done}
-                        onClick={() => void check(h, d)}
+                        onClick={() => {
+                          if (reason) toast(reason);
+                          else if (pending !== h.id + d) void check(h, d);
+                        }}
                       >
                         {done ? <Check size={17} /> : enabled ? <span /> : "—"}
                         <small className="habit-mobile-day" aria-hidden="true">
@@ -527,6 +550,12 @@ export function HabitsPage({
       )}
       <div className="habit-footnote">
         <span className="eyebrow">A NOTE ON CONSISTENCY</span>
+        <p id="habit-checkin-help">
+          You can check in on any scheduled day from the start date through
+          today, including missed days. Select a habit’s name to open its
+          monthly history. Days outside its schedule stay unavailable, even on
+          its start date.
+        </p>
         <p>
           An unfinished today doesn’t break your streak. Missed scheduled days
           do. Weekly streaks count weeks that meet your target.
@@ -567,7 +596,7 @@ function HabitHistory({
   pending: string;
   onCheck: (h: Row<"habits">, d: string) => Promise<void>;
 }) {
-  const { data, preferences } = useWorkspace();
+  const { data, preferences, toast } = useWorkspace();
   const current = today(preferences.timezone),
     stats = habitStats(habit, data.habit_entries, current),
     d = Temporal.PlainDate.from(month),
@@ -621,23 +650,33 @@ function HabitHistory({
           <ChevronRight size={18} />
         </Button>
       </div>
+      <p className="subtle" id="habit-history-help">
+        Backfill a missed scheduled day by selecting its date. Future dates,
+        dates before the start date and days outside your schedule are
+        unavailable.
+      </p>
       <div className="habit-calendar">
         {days.map((date) => {
           const done = data.habit_entries.some(
             (e) => e.habit_id === habit.id && e.date === date,
           );
+          const reason = checkInUnavailable(habit, date, current);
           return (
             <button
               key={date}
               className={`${done ? "checked" : ""} ${date.slice(0, 7) !== month.slice(0, 7) ? "outside" : ""}`}
               aria-label={`Check-in ${date}`}
               aria-pressed={done}
-              disabled={
-                !habitScheduled(habit, date) ||
-                date > current ||
-                pending === habit.id + date
+              aria-disabled={Boolean(reason) || pending === habit.id + date}
+              aria-describedby="habit-history-help"
+              title={
+                reason ||
+                (done ? "Remove check-in" : "Record or backfill this day")
               }
-              onClick={() => void onCheck(habit, date)}
+              onClick={() => {
+                if (reason) toast(reason);
+                else if (pending !== habit.id + date) void onCheck(habit, date);
+              }}
             >
               <span>{Temporal.PlainDate.from(date).day}</span>
               {done && <Check size={14} />}

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
-import { body, failure, json, originAllowed } from "@/lib/api";
+import { body, failure, json, originAllowed, appOrigin } from "@/lib/api";
 export async function POST(request: Request) {
   if (!originAllowed(request))
     return json({ error: "Request origin rejected" }, 403);
@@ -12,6 +12,7 @@ export async function POST(request: Request) {
           "signup",
           "logout",
           "reset",
+          "resend",
           "update",
           "delete",
         ]),
@@ -32,11 +33,34 @@ export async function POST(request: Request) {
     )
       return json({ error: "Passwords do not match." }, 400);
     const db = await supabase();
-    const origin = request.headers.get("origin")!;
+    const origin = appOrigin(request);
     if (input.action === "logout") {
       const { error } = await db.auth.signOut();
       if (error) throw error;
       return json({ ok: true });
+    }
+    if (input.action === "resend") {
+      if (!input.email) throw new Error("Enter your email");
+      const { error } = await db.auth.resend({
+        type: "signup",
+        email: input.email,
+        options: { emailRedirectTo: `${origin}/auth/callback` },
+      });
+      if (error && error.status === 429)
+        return json(
+          {
+            error: "Please wait before requesting another confirmation email.",
+          },
+          429,
+        );
+      if (error && error.status && error.status >= 500)
+        throw new Error(
+          "Email delivery is temporarily unavailable. Please try again.",
+        );
+      return json({
+        message:
+          "If that address needs confirmation, a new email is on its way. Use the newest link.",
+      });
     }
     if (input.action === "reset") {
       if (!input.email) throw new Error("Enter your email");
@@ -99,7 +123,25 @@ export async function POST(request: Request) {
       email: input.email,
       password: input.password,
     });
-    if (error) throw error;
+    if (error) {
+      if (error.code === "invalid_credentials")
+        return json(
+          {
+            error:
+              "Email or password is incorrect. Check your details or reset your password. If you deleted your account, create a new one.",
+          },
+          400,
+        );
+      if (error.code === "email_not_confirmed")
+        return json(
+          {
+            error:
+              "Confirm your email before signing in. You can request a new confirmation email below.",
+          },
+          400,
+        );
+      throw error;
+    }
     return json({ ok: true });
   } catch (error) {
     return failure(error);

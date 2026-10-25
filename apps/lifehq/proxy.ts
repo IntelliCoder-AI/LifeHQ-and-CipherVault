@@ -1,6 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 export async function proxy(request: NextRequest) {
+  // Keep PKCE verifier cookies and email callbacks on the same public origin.
+  if (
+    ["production", "preview"].includes(process.env.VERCEL_ENV || "") &&
+    process.env.NEXT_PUBLIC_APP_URL &&
+    request.method === "GET" &&
+    ["/login", "/reset"].includes(request.nextUrl.pathname)
+  ) {
+    const canonical = new URL(process.env.NEXT_PUBLIC_APP_URL);
+    if (canonical.origin !== request.nextUrl.origin) {
+      const destination = new URL(
+        request.nextUrl.pathname + request.nextUrl.search,
+        canonical.origin,
+      );
+      const redirect = NextResponse.redirect(destination);
+      redirect.headers.set("Cache-Control", "private, no-store");
+      return redirect;
+    }
+  }
   const nonce = btoa(crypto.randomUUID());
   const headers = new Headers(request.headers);
   headers.set("x-nonce", nonce);

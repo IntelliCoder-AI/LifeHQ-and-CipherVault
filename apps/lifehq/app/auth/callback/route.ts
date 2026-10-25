@@ -10,6 +10,12 @@ export async function GET(request: Request) {
     const db = await supabase();
     const { error } = await db.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL(next, appOrigin(request)));
+    const destination = new URL("/login", appOrigin(request));
+    destination.searchParams.set(
+      "error",
+      "This email link could not complete sign-in in this browser. Try signing in with your password, or request a fresh confirmation or recovery email.",
+    );
+    return NextResponse.redirect(destination);
   }
   return NextResponse.redirect(
     new URL(

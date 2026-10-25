@@ -4058,3 +4058,44 @@ textarea {
 .modal-overlay {
   background: #514a40bd;
 }
+
+.habit-check[aria-disabled="true"],
+.habit-calendar button[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: help;
+}
+.workspace-feedback {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 110;
+  display: grid;
+  gap: 10px;
+  max-width: min(460px, calc(100vw - 32px));
+}
+.workspace-feedback .toast {
+  position: static;
+  transform: none;
+  margin: 0;
+  max-width: 100%;
+}
+.undo-toast {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+@media (max-width: 600px) {
+  .workspace-feedback {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+.undo-toast .button {
+  color: var(--ink);
+  flex-shrink: 0;
+}
+.undo-toast > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
