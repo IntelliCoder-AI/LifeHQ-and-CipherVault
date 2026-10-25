@@ -13,7 +13,7 @@ async function readLimited(request: Request) {
     size += value.byteLength;
     if (size > IMPORT_BYTES) {
       await reader.cancel();
-      throw new Error("Choose a JSON file smaller than 5 MB.");
+      throw new Error("Choose a JSON file smaller than 4 MB.");
     }
     chunks.push(value);
   }

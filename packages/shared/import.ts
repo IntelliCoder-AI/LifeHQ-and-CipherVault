@@ -10,7 +10,7 @@ import {
   type Preferences,
 } from "./index";
 export const IMPORT_LIMIT = 2000;
-export const IMPORT_BYTES = 5 * 1024 * 1024;
+export const IMPORT_BYTES = 4 * 1024 * 1024;
 export const importOrder: Table[] = [
   "projects",
   "habits",

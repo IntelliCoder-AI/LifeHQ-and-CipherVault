@@ -26,7 +26,7 @@ export function WorkspaceImport({
     setError("");
     try {
       if (selected.size > IMPORT_BYTES)
-        throw new Error("Choose a JSON file smaller than 5 MB.");
+        throw new Error("Choose a JSON file smaller than 4 MB.");
       const backup: unknown = JSON.parse(await selected.text()),
         result = inspectBackup(backup);
       setPreview({ ...result, backup, name: selected.name });

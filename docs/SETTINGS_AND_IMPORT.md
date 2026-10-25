@@ -10,7 +10,7 @@ Built-in email quota errors explain the sending limit, while general request thr
 
 ## JSON import
 
-Settings places Import JSON beside the export action. A LifeHQ version-1 export (up to 5 MB / 2,000 records) is validated before the preview opens. The dialog shows record counts, explains additive copying and duplicate imports, and lets the owner explicitly include preferences. It never replaces existing records. Imported preferences include the display name, appearance, timezone and profile photo, and refresh the Settings draft intentionally.
+Settings places Import JSON beside the export action. A LifeHQ version-1 export (up to 4 MB / 2,000 records) is validated before the preview opens. The dialog shows record counts, explains additive copying and duplicate imports, and lets the owner explicitly include preferences. It never replaces existing records. Imported preferences include the display name, appearance, timezone and profile photo, and refresh the Settings draft intentionally.
 
 Every imported ID is regenerated and references are remapped. Task parents are sorted before children, and cycles, missing links, duplicate source IDs, unknown table types and invalid records are rejected. Exported owner IDs, versions and creation/update metadata cannot assign ownership or overwrite existing records. Database timestamp offsets are normalized for compatibility with hosted exports.
 
