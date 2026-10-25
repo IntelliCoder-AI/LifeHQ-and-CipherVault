@@ -218,3 +218,113 @@ test("deleted-account confirmation and expired-link recovery have clear next ste
   );
   expect(action).toBe("resend");
 });
+
+test("JSON import previews an export, remaps linked records, and survives reload", async ({
+  page,
+}) => {
+  await create(page, "projects", "Import parent");
+  await submit(page, "Create project");
+  await create(page, "tasks", "Import child");
+  await page
+    .getByRole("dialog")
+    .getByLabel("Project", { exact: true })
+    .selectOption({ label: "Import parent" });
+  await submit(page, "Create task");
+  const original = await raw(page);
+  const backup = {
+    format: "lifehq",
+    version: 1,
+    data: original.data,
+    preferences: {
+      ...original.preferences,
+      name: "Restored preferences",
+      theme: "dark",
+    },
+  };
+  await page.goto("/demo/settings");
+  await page.getByLabel("Workspace JSON file").setInputFiles({
+    name: "workspace.json",
+    mimeType: "application/json",
+    buffer: Buffer.from(JSON.stringify(backup)),
+  });
+  await expect(
+    page.getByRole("dialog", { name: "Import your workspace" }),
+  ).toContainText("2 records");
+  await expect(page.getByRole("dialog")).toContainText(
+    "Existing records stay in place",
+  );
+  await page.getByRole("checkbox", { name: /Also import preferences/ }).check();
+  await page
+    .getByRole("button", { name: "Import 2 records", exact: true })
+    .click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByLabel("Display name")).toHaveValue(
+    "Restored preferences",
+  );
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.reload();
+  const saved = await raw(page);
+  expect(saved.data.tasks).toHaveLength(2);
+  expect(saved.data.projects).toHaveLength(2);
+  const copy = saved.data.tasks.find(
+    (r: { id: string }) => r.id !== original.data.tasks[0].id,
+  );
+  expect(copy.project_id).not.toBe(original.data.projects[0].id);
+  expect(
+    saved.data.projects.some((r: { id: string }) => r.id === copy.project_id),
+  ).toBe(true);
+  await page.getByLabel("Workspace JSON file").setInputFiles({
+    name: "invalid.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('{"format":"wrong","version":1,"data":{}}'),
+  });
+  await expect(page.locator(".error[role=alert]")).toBeVisible();
+  expect((await raw(page)).data.tasks).toHaveLength(2);
+});
+test("profile photos are resized, saved privately, shown in navigation and removable", async ({
+  page,
+}) => {
+  await page.goto("/demo/settings");
+  const image = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 300;
+    canvas.height = 200;
+    const c = canvas.getContext("2d")!;
+    c.fillStyle = "#a34b1d";
+    c.fillRect(0, 0, 300, 200);
+    return canvas.toDataURL("image/png").split(",")[1];
+  });
+  await page.getByLabel("Profile photo file").setInputFiles({
+    name: "test-photo.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(image, "base64"),
+  });
+  await expect(page.getByAltText("Your chosen profile photo")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Save preferences", exact: true })
+    .click();
+  await page.reload();
+  await expect(page.locator(".profile-avatar img")).toBeVisible();
+  const saved = await raw(page);
+  expect(saved.preferences.avatar).toMatch(/^data:image\/jpeg;base64,/);
+  expect(saved.preferences.avatar.length).toBeLessThan(64000);
+  await page.getByRole("button", { name: "Remove photo", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Save preferences", exact: true })
+    .click();
+  await page.reload();
+  await expect(page.locator(".profile-avatar img")).toHaveCount(0);
+});
+test("email-confirmed feedback is shown once and removes its navigation marker", async ({
+  page,
+}) => {
+  await page.goto("/demo?notice=email-confirmed");
+  await expect(page.locator(".workspace-feedback [role=status]")).toContainText(
+    "Email confirmed.",
+  );
+  await expect(page).not.toHaveURL(/notice=/);
+  await page.reload();
+  await expect(page.locator(".workspace-feedback [role=status]")).toHaveCount(
+    0,
+  );
+});

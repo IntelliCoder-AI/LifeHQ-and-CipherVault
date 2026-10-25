@@ -14,6 +14,8 @@ export async function POST(request: Request) {
           "reset",
           "resend",
           "update",
+          "change_password",
+          "change_email",
           "delete",
         ]),
         email: z.email().optional(),
@@ -25,10 +27,11 @@ export async function POST(request: Request) {
         name: z.string().max(80).optional(),
         confirmation: z.string().optional(),
         confirmPassword: z.string().max(128).optional(),
+        currentPassword: z.string().min(1).max(128).optional(),
       })
       .parse(await body(request));
     if (
-      (input.action === "signup" || input.action === "update") &&
+      ["signup", "update", "change_password"].includes(input.action) &&
       input.password !== input.confirmPassword
     )
       return json({ error: "Passwords do not match." }, 400);
@@ -73,12 +76,91 @@ export async function POST(request: Request) {
           "If that address has an account, a recovery email is on its way.",
       });
     }
+    if (input.action === "change_password" || input.action === "change_email") {
+      const {
+        data: { user },
+      } = await db.auth.getUser();
+      if (!user?.email)
+        return json(
+          { error: "Sign in again before changing account details." },
+          401,
+        );
+      if (!input.currentPassword)
+        throw new Error("Enter your current password.");
+      if (input.action === "change_password") {
+        if (!input.password) throw new Error("Enter a new password.");
+        const { error: reauth } = await db.auth.signInWithPassword({
+          email: user.email,
+          password: input.currentPassword,
+        });
+        if (reauth)
+          return json(
+            { error: "Your current password was not accepted." },
+            400,
+          );
+        const { error } = await db.auth.updateUser({
+          password: input.password,
+          current_password: input.currentPassword,
+        });
+        if (error) throw error;
+        return json({
+          ok: true,
+          message:
+            "Password updated. Use your new password the next time you sign in.",
+        });
+      }
+      if (!input.email) throw new Error("Enter your new email address.");
+      if (input.email.toLowerCase() === user.email.toLowerCase())
+        throw new Error("Enter a different email address.");
+      const { error: reauth } = await db.auth.signInWithPassword({
+        email: user.email,
+        password: input.currentPassword,
+      });
+      if (reauth)
+        return json({ error: "Your current password was not accepted." }, 400);
+      const { data, error } = await db.auth.updateUser(
+        { email: input.email },
+        { emailRedirectTo: `${origin}/auth/callback` },
+      );
+      if (error) throw error;
+      return json({
+        ok: true,
+        message:
+          data.user?.email?.toLowerCase() === input.email.toLowerCase()
+            ? "Email address updated."
+            : "Check your current and new inboxes for Supabase’s confirmation instructions. Your sign-in email stays unchanged until confirmation is complete.",
+      });
+    }
     if (input.action === "update") {
       const {
         data: { user },
       } = await db.auth.getUser();
       if (!user)
         return json({ error: "Sign in using your recovery email first" }, 401);
+      const { data: verified, error: claimsError } = await db.auth.getClaims();
+      const now = Math.floor(Date.now() / 1000);
+      const recovery =
+        !claimsError &&
+        verified?.claims.sub === user.id &&
+        verified.claims.amr?.some((entry) => {
+          const method = typeof entry === "string" ? entry : entry.method;
+          const timestamp =
+            typeof entry === "string" ? verified.claims.iat : entry.timestamp;
+          return (
+            method === "recovery" &&
+            typeof timestamp === "number" &&
+            timestamp <= now + 60 &&
+            timestamp >= now - 3600
+          );
+        });
+      if (!recovery)
+        return json(
+          {
+            error:
+              "Open a fresh password-reset email link before choosing a new password.",
+          },
+          403,
+        );
       if (!input.password) throw new Error("Enter a new password");
       const { error } = await db.auth.updateUser({ password: input.password });
       if (error) throw error;
@@ -144,6 +226,31 @@ export async function POST(request: Request) {
     }
     return json({ ok: true });
   } catch (error) {
+    const authError = error as { code?: string; status?: number };
+    if (authError.code === "over_email_send_rate_limit")
+      return json(
+        {
+          error:
+            "The email sending limit has been reached. Please wait before requesting another email. This does not mean your account or password is invalid.",
+        },
+        429,
+      );
+    if (authError.status === 429)
+      return json(
+        { error: "Too many requests. Please wait before trying again." },
+        429,
+      );
+    if (
+      authError.code === "reauthentication_needed" ||
+      authError.code === "reauthentication_not_valid"
+    )
+      return json(
+        {
+          error:
+            "For your security, sign out and sign in again before changing your password.",
+        },
+        400,
+      );
     return failure(error);
   }
 }

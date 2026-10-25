@@ -75,3 +75,6 @@ Further documentation: [Architecture](ARCHITECTURE.md), [Design system](DESIGN_S
 [Mobile tasks](docs/screenshots/tasks-390.png) · [Note editor](docs/screenshots/note-editor-1440.png) · [Project board](docs/screenshots/project-board-1440.png) · [Dark theme](docs/screenshots/overview-dark-1440.png) · [Vault dummy item](docs/screenshots/vault-detail-1440.png) · [Planner](docs/screenshots/planner-1440.png) · [Goals](docs/screenshots/goals-1440.png) · [Habits](docs/screenshots/habits-390.png) · [CipherVault setup](docs/screenshots/vault-setup-1440.png)
 
 CipherVault interface: https://ciphervault-orpin.vercel.app — a separate browser-local prototype. The production root returned HTTP 200 through the Vercel connector, with its restrictive CSP and prototype label. This does not establish an independent crypto audit or complete hosted browser verification.
+
+
+Settings includes current-password-verified email/password changes for signed-in accounts, a private profile photo, and additive JSON import beside Export. Imports preview counts and preserve record relationships while creating new owned copies. See [the settings/import notes](docs/SETTINGS_AND_IMPORT.md) for limits and verification details.

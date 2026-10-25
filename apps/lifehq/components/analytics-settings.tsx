@@ -1,4 +1,7 @@
 "use client";
+import { WorkspaceImport } from "./workspace-import";
+import { AccountSecurity } from "./account-security";
+import { ProfilePhoto } from "./profile-photo";
 import { useState } from "react";
 import { useTheme } from "@lifehq/ui/theme";
 import { useRouter } from "next/navigation";
@@ -453,6 +456,11 @@ export function SettingsPage() {
       <form onSubmit={submit} className="stack">
         <section className="paper-panel">
           <SectionTitle eyebrow="MAKE YOURSELF AT HOME" title="Your profile" />
+          <ProfilePhoto
+            value={draft.avatar}
+            name={draft.name}
+            onChange={(photo) => change("avatar", photo)}
+          />
           <div className="form-grid">
             <Field label="Display name">
               <input
@@ -636,6 +644,7 @@ export function SettingsPage() {
         </div>
       </form>
       <aside className="stack">
+        <AccountSecurity />
         <section className="paper-panel">
           <span className="eyebrow">YOUR DATA BELONGS TO YOU</span>
           <h2>Take it with you.</h2>
@@ -666,6 +675,13 @@ export function SettingsPage() {
             <Download size={16} />
             Export all data
           </Button>
+          <div className="import-action">
+            <WorkspaceImport
+              onImported={(imported) => {
+                if (imported) setDraft(imported);
+              }}
+            />
+          </div>
         </section>
         {demo ? (
           <section className="paper-panel">

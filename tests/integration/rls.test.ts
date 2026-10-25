@@ -1,3 +1,6 @@
+import { sampleData } from "../../apps/lifehq/lib/demo";
+import { prepareImport } from "../../packages/shared/import";
+import { defaults, schemas } from "../../packages/shared/index";
 import { PGlite } from "@electric-sql/pglite";
 import { readFileSync, readdirSync } from "node:fs";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
@@ -224,6 +227,120 @@ describe("database-enforced account isolation on real PostgreSQL (PGlite)", () =
       db.exec("select public.pending_record_deletions()"),
     ).rejects.toThrow();
     await asUser(a);
+  });
+  it("imports linked records atomically under the authenticated owner", async () => {
+    await asUser(a);
+    const projectId = "00000000-0000-4000-8000-000000000031",
+      taskId = "00000000-0000-4000-8000-000000000032";
+    const payload = {
+      data: {
+        projects: [
+          {
+            ...schemas.projects.parse({ title: "Imported project" }),
+            id: projectId,
+            user_id: b,
+          },
+        ],
+        tasks: [
+          {
+            ...schemas.tasks.parse({
+              title: "Imported child",
+              project_id: projectId,
+            }),
+            id: taskId,
+            user_id: b,
+          },
+        ],
+      },
+      preferences: { name: "Imported name", timezone: "Asia/Kolkata" },
+    };
+    const result = await db.query<{ result: { imported: number } }>(
+      "select public.import_workspace($1::jsonb) as result",
+      [JSON.stringify(payload)],
+    );
+    expect(result.rows[0].result.imported).toBe(2);
+    expect(
+      (
+        await db.query(
+          `select user_id,project_id from tasks where id='${taskId}'`,
+        )
+      ).rows,
+    ).toEqual([{ user_id: a, project_id: projectId }]);
+    await asUser(b);
+    expect(
+      (await db.query(`select id from tasks where id='${taskId}'`)).rows,
+    ).toEqual([]);
+    await db.exec("reset role;set role anon");
+    await expect(
+      db.exec("select public.import_workspace('{}'::jsonb)"),
+    ).rejects.toThrow();
+    await asUser(a);
+  });
+  it("rolls back an entire import and preference update when one row is invalid", async () => {
+    await asUser(a);
+    const id = "00000000-0000-4000-8000-000000000033";
+    const payload = {
+      data: {
+        projects: [
+          { ...schemas.projects.parse({ title: "Must roll back" }), id },
+        ],
+        tasks: [
+          {
+            ...schemas.tasks.parse({
+              title: "Broken relationship",
+              project_id: "00000000-0000-4000-8000-000000000099",
+            }),
+            id: "00000000-0000-4000-8000-000000000034",
+          },
+        ],
+      },
+      preferences: { name: "Must roll back" },
+    };
+    await expect(
+      db.query("select public.import_workspace($1::jsonb)", [
+        JSON.stringify(payload),
+      ]),
+    ).rejects.toThrow();
+    expect(
+      (await db.query(`select id from projects where id='${id}'`)).rows,
+    ).toEqual([]);
+    expect(
+      (
+        await db.query<{ preferences: { name: string } }>(
+          "select preferences from profiles",
+        )
+      ).rows[0].preferences.name,
+    ).toBe("Imported name");
+  });
+  it("restores a complete linked sample export through the transactional import RPC", async () => {
+    await asUser(a);
+    const prepared = prepareImport(
+      {
+        format: "lifehq",
+        version: 1,
+        data: sampleData(),
+        preferences: defaults,
+      },
+      a,
+      true,
+    );
+    const result = await db.query<{ result: { imported: number } }>(
+      "select public.import_workspace($1::jsonb) as result",
+      [
+        JSON.stringify({
+          data: prepared.data,
+          preferences: prepared.preferences,
+        }),
+      ],
+    );
+    expect(result.rows[0].result.imported).toBe(prepared.count);
+    expect(
+      (
+        await db.query(
+          `select id from projects where id='${prepared.data.projects[0].id}' and user_id='${a}'`,
+        )
+      ).rows,
+    ).toHaveLength(1);
   });
   it("deletes only the current account and its data transactionally", async () => {
     await db.exec(

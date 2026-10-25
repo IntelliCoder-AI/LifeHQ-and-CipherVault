@@ -500,7 +500,15 @@ export function HabitsPage({
                 </div>
                 <div className="habit-streak">
                   <strong>{stats.current}</strong>
-                  <span>{h.frequency === "weekly" ? "weeks" : "days"}</span>
+                  <span>
+                    {h.frequency === "weekly"
+                      ? stats.current === 1
+                        ? "week"
+                        : "weeks"
+                      : stats.current === 1
+                        ? "day"
+                        : "days"}
+                  </span>
                 </div>
                 <div className="habit-row-actions">
                   <Button

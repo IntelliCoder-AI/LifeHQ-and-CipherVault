@@ -5,7 +5,8 @@
   "exports": {
     ".": "./index.ts",
     "./dates": "./dates.ts",
-    "./analytics": "./analytics.ts"
+    "./analytics": "./analytics.ts",
+    "./import": "./import.ts"
   },
   "dependencies": {
     "@js-temporal/polyfill": "0.5.1",

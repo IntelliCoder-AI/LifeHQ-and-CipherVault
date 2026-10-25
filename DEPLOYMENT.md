@@ -72,3 +72,8 @@ The interface remains a dummy-credentials-only, unaudited prototype. Hosting doe
 CipherVault has its own Vercel project rooted at `apps/ciphervault`, with source files outside the root enabled and `cd ../.. && npm ci` as the install command. It needs no Supabase credentials. Point LifeHQ's `NEXT_PUBLIC_VAULT_URL` to the verified canonical HTTPS app address and rebuild LifeHQ. Production launch links reject a localhost URL; no production button should require a server on the visitor's computer.
 
 This hosts the prototype interface only. Ciphertexts remain in origin-bound browser IndexedDB, with no cloud sync or shared LifeHQ authentication. Use the stable canonical address: a different hostname has separate storage. Independent review remains required before real credentials. Preview/deployment URL protection is retained; the canonical production project domain is public.
+
+
+## Settings and import release
+
+Apply the checked-in workspace JSON import migration before deploying the updated LifeHQ app. It adds an authenticated, security-invoker RPC with explicit anonymous-execution revocation; it does not replace any existing records. Profile photos use the existing private profile preferences, with no Storage bucket or runtime secret. The verified public URLs and Supabase callback allowlist stay the same. Email-change confirmation and password recovery depend on actual provider delivery; custom SMTP can avoid the built-in mail quota but does not remove Supabase or provider request limits. No SMTP provider was configured in this release.

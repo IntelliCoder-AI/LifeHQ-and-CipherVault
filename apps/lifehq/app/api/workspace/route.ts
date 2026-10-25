@@ -51,7 +51,11 @@ export async function GET() {
         name: user.user_metadata.display_name || "Friend",
         ...profile?.preferences,
       }),
-      user: { id: user.id, email: user.email },
+      user: {
+        id: user.id,
+        email: user.email,
+        pendingEmail: user.new_email || "",
+      },
     });
   } catch (error) {
     return failure(error);

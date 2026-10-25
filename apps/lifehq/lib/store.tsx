@@ -26,6 +26,7 @@ import {
   visibleRecords,
   type PendingDeletion,
 } from "./deletions";
+import { prepareImport, mergeImported } from "@lifehq/shared/import";
 import { DEMO_KEY, DEMO_USER, sampleData } from "./demo";
 import { today, type Scheduled } from "@lifehq/shared/dates";
 export type Store = {
@@ -36,6 +37,7 @@ export type Store = {
   error: string;
   busy: boolean;
   email: string;
+  pendingEmail: string;
   refresh: () => Promise<void>;
   save: <T extends Table>(
     table: T,
@@ -50,6 +52,10 @@ export type Store = {
   ) => Promise<Row<T>>;
   bulk: (ids: string[], status: "todo" | "doing" | "done") => Promise<void>;
   setPreferences: (p: Preferences) => Promise<void>;
+  importWorkspace: (
+    backup: unknown,
+    includePreferences: boolean,
+  ) => Promise<void>;
   loadSamples: () => void;
   clearDemo: () => void;
   toggleHabit: (habit: Row<"habits">, date: string) => Promise<void>;
@@ -93,6 +99,7 @@ export function WorkspaceProvider({
     [pending, setPending] = useState(0),
     [pendingDeletions, setPendingDeletions] = useState<PendingDeletion[]>([]),
     [email, setEmail] = useState(""),
+    [pendingEmail, setPendingEmail] = useState(""),
     [message, setMessage] = useState("");
   const themeInitialized = useRef(false),
     deletionQueue = useRef(pendingDeletions),
@@ -159,6 +166,7 @@ export function WorkspaceProvider({
           setTheme(result.preferences.theme);
         }
         setEmail(result.user.email);
+        setPendingEmail(result.user.pendingEmail || "");
       }
     } catch (e) {
       setError(
@@ -435,6 +443,43 @@ export function WorkspaceProvider({
     },
     [demo, commit, toast, setTheme],
   );
+  const importWorkspace = useCallback(
+    async (backup: unknown, includePreferences: boolean) => {
+      setPending((n) => n + 1);
+      try {
+        let count = 0;
+        if (demo) {
+          const prepared = prepareImport(backup, DEMO_USER, includePreferences);
+          const p = prepared.preferences || { ...prefs.current, theme };
+          commit(mergeImported(snapshot.current, prepared.data), p);
+          if (prepared.preferences) {
+            setPref(p);
+            prefs.current = p;
+            setTheme(p.theme);
+          }
+          count = prepared.count;
+        } else {
+          const result = await api("/api/import", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ backup, includePreferences }),
+          });
+          count = result.imported;
+          // Imported preferences are applied intentionally, unlike background refreshes.
+          if (includePreferences) themeInitialized.current = false;
+          await refresh();
+        }
+        toast(
+          count
+            ? `${count} ${count === 1 ? "record" : "records"} imported as new copies`
+            : "Preferences imported",
+        );
+      } finally {
+        setPending((n) => n - 1);
+      }
+    },
+    [demo, commit, refresh, toast, setTheme, theme],
+  );
   const toggleHabit = useCallback(
     async (habit: Row<"habits">, date: string) => {
       if (date > today(prefs.current.timezone) || date < habit.start_date)
@@ -513,12 +558,14 @@ export function WorkspaceProvider({
         error,
         busy: pending > 0,
         email,
+        pendingEmail,
         refresh,
         save,
         update,
         remove,
         bulk,
         setPreferences,
+        importWorkspace,
         loadSamples: () => {
           deletionQueue.current = [];
           setPendingDeletions([]);

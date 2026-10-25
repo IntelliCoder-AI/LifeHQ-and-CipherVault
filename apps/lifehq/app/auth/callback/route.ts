@@ -9,7 +9,12 @@ export async function GET(request: Request) {
   if (code) {
     const db = await supabase();
     const { error } = await db.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(new URL(next, appOrigin(request)));
+    if (!error) {
+      const destination = new URL(next, appOrigin(request));
+      if (next === "/workspace")
+        destination.searchParams.set("notice", "email-confirmed");
+      return NextResponse.redirect(destination);
+    }
     const destination = new URL("/login", appOrigin(request));
     destination.searchParams.set(
       "error",

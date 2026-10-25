@@ -4099,3 +4099,68 @@ textarea {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.profile-photo-editor {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 26px 0;
+}
+.profile-photo-preview {
+  width: 76px;
+  height: 76px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-primary);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-size: 30px;
+}
+.profile-photo-preview img,
+.workspace-avatar img,
+.profile-avatar img {
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+.workspace-avatar,
+.profile-avatar {
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.account-security .form-stack {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.account-security > .notice,
+.account-security > .error {
+  margin-top: 20px;
+}
+@media (max-width: 600px) {
+  .profile-photo-editor {
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .profile-photo-preview {
+    width: 58px;
+    height: 58px;
+  }
+}
+
+.import-action {
+  margin-top: 14px;
+}
+.import-counts {
+  display: grid;
+  gap: 8px;
+  margin: 22px 0;
+  padding: 16px 0;
+  border-block: 1px solid var(--line);
+}
+.import-counts span {
+  text-transform: capitalize;
+}

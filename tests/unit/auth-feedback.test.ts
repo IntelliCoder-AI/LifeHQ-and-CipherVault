@@ -6,6 +6,7 @@ const mock = vi.hoisted(() => ({
   resetPasswordForEmail: vi.fn(),
   signOut: vi.fn(),
   getUser: vi.fn(),
+  getClaims: vi.fn(),
   updateUser: vi.fn(),
   rpc: vi.fn(),
   exchangeCodeForSession: vi.fn(),
@@ -105,7 +106,9 @@ describe("public auth URLs and feedback", () => {
         `${live}/auth/callback?code=dummy&next=https://attacker.example`,
       ),
     );
-    expect(unsafe.headers.get("location")).toBe(`${live}/workspace`);
+    expect(unsafe.headers.get("location")).toBe(
+      `${live}/workspace?notice=email-confirmed`,
+    );
     mock.exchangeCodeForSession.mockResolvedValue({
       error: { code: "bad_code_verifier" },
     });
@@ -137,6 +140,106 @@ describe("public auth URLs and feedback", () => {
   it("rejects malformed configured origins", () => {
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://example.test/other/path");
     expect(() => appOrigin(request({}))).toThrow("valid public");
+  });
+  it("checks the current password before changing either account credential", async () => {
+    mock.getUser.mockResolvedValue({
+      data: { user: { id: "test-user", email: "dummy@example.test" } },
+    });
+    mock.signInWithPassword.mockResolvedValue({
+      error: { code: "invalid_credentials" },
+    });
+    for (const action of ["change_email", "change_password"]) {
+      const response = await POST(
+        request({
+          action,
+          email: "new@example.test",
+          currentPassword: "wrong",
+          password: "a-new-test-password",
+          confirmPassword: "a-new-test-password",
+        }),
+      );
+      expect(response.status).toBe(400);
+    }
+    expect(mock.updateUser).not.toHaveBeenCalled();
+  });
+  it("updates credentials after reauthentication and sends email changes to the public callback", async () => {
+    mock.getUser.mockResolvedValue({
+      data: { user: { id: "test-user", email: "dummy@example.test" } },
+    });
+    mock.updateUser.mockResolvedValue({
+      data: { user: { email: "dummy@example.test" } },
+      error: null,
+    });
+    const changed = await POST(
+      request({
+        action: "change_email",
+        email: "new@example.test",
+        currentPassword: "current-test-password",
+      }),
+    );
+    expect((await changed.json()).message).toContain("inboxes");
+    expect(mock.updateUser).toHaveBeenCalledWith(
+      { email: "new@example.test" },
+      { emailRedirectTo: `${live}/auth/callback` },
+    );
+    await POST(
+      request({
+        action: "change_password",
+        currentPassword: "current-test-password",
+        password: "new-test-password",
+        confirmPassword: "new-test-password",
+      }),
+    );
+    expect(mock.updateUser).toHaveBeenCalledWith({
+      password: "new-test-password",
+      current_password: "current-test-password",
+    });
+  });
+  it("only permits the reset endpoint for a fresh, verified recovery session", async () => {
+    mock.getUser.mockResolvedValue({
+      data: { user: { id: "test-user", email: "dummy@example.test" } },
+    });
+    const now = Math.floor(Date.now() / 1000);
+    const payload = {
+      action: "update",
+      password: "new-test-password",
+      confirmPassword: "new-test-password",
+    };
+    for (const claims of [
+      { sub: "test-user", amr: [{ method: "password", timestamp: now }] },
+      {
+        sub: "test-user",
+        amr: [{ method: "recovery", timestamp: now - 4000 }],
+      },
+      { sub: "other-user", amr: [{ method: "recovery", timestamp: now }] },
+    ]) {
+      mock.getClaims.mockResolvedValue({ data: { claims }, error: null });
+      expect((await POST(request(payload))).status).toBe(403);
+    }
+    expect(mock.updateUser).not.toHaveBeenCalled();
+    mock.getClaims.mockResolvedValue({
+      data: {
+        claims: {
+          sub: "test-user",
+          amr: [{ method: "recovery", timestamp: now }],
+        },
+      },
+      error: null,
+    });
+    mock.updateUser.mockResolvedValue({ error: null });
+    expect((await POST(request(payload))).status).toBe(200);
+  });
+  it("explains an email rate limit without treating it as a bad password", async () => {
+    mock.resetPasswordForEmail.mockResolvedValue({
+      error: { code: "over_email_send_rate_limit", status: 429 },
+    });
+    const response = await POST(
+      request({ action: "reset", email: "dummy@example.test" }),
+    );
+    expect(response.status).toBe(429);
+    expect((await response.json()).error).toContain(
+      "does not mean your account or password is invalid",
+    );
   });
   it("resend gives the same response for absent and pending accounts", async () => {
     const first = await (

@@ -23,4 +23,4 @@ Direct public browser access from this managed environment remains restricted. V
 
 Validation covers unit tests for canonical auth URLs, callback destinations, privacy-safe resend/login errors and account-deletion reauthentication; PostgreSQL tests for queue ownership, rollback/undo, expiry/cascades and version conflicts; and browser checks for theme agreement, habits, reload-safe undo and feedback. Final results are recorded in TESTING.md.
 
-The broader feature list (account email/password settings, global JSON import, persistent trash, push reminders, avatar and further board interaction work) remains a separate backlog.
+Account email/password settings, global JSON import, profile photos and confirmation feedback are delivered in the subsequent [settings/import release](SETTINGS_AND_IMPORT.md). The owner confirmed board dragging works. Persistent trash and push reminders remain separate extensions.

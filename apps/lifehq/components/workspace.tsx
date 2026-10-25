@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { ThemeToggle } from "@lifehq/ui/theme";
 import { useWorkspaceRouter } from "@/lib/navigation";
 import { Suspense, useEffect, useRef, useState, useMemo } from "react";
@@ -173,6 +174,15 @@ function Shell() {
     const timer = setInterval(() => setNow(Date.now()), 60000);
     return () => clearInterval(timer);
   }, []);
+  useEffect(() => {
+    if (params.get("notice") !== "email-confirmed") return;
+    toast("Email confirmed. You’re signed in.");
+    const clean = new URLSearchParams(params.toString());
+    clean.delete("notice");
+    router.replace(`${pathname}${clean.size ? `?${clean}` : ""}`, {
+      scroll: false,
+    });
+  }, [params, pathname, router, toast]);
   const date = today(preferences.timezone);
   const upcoming = useMemo(
     () =>
@@ -224,7 +234,17 @@ function Shell() {
       </Link>
       <div className="workspace-label">
         <span className="workspace-avatar">
-          {preferences.name[0]?.toUpperCase()}
+          {preferences.avatar ? (
+            <Image
+              src={preferences.avatar}
+              alt=""
+              width={40}
+              height={40}
+              unoptimized
+            />
+          ) : (
+            preferences.name[0]?.toUpperCase()
+          )}
         </span>
         <div>
           <strong>My personal space</strong>
@@ -301,7 +321,17 @@ function Shell() {
         </Link>
         <button className="profile-button" onClick={() => void logout()}>
           <span className="profile-avatar">
-            {preferences.name[0]?.toUpperCase()}
+            {preferences.avatar ? (
+              <Image
+                src={preferences.avatar}
+                alt=""
+                width={40}
+                height={40}
+                unoptimized
+              />
+            ) : (
+              preferences.name[0]?.toUpperCase()
+            )}
           </span>
           <span className="grow">
             <strong>{preferences.name}</strong>

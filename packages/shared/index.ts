@@ -186,6 +186,15 @@ const reviewSchema = z
 export const preferencesSchema = z
   .object({
     name: z.string().trim().min(1).max(80).default("Friend"),
+    avatar: z
+      .string()
+      .max(64000)
+      .regex(
+        /^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/,
+        "Choose a valid JPEG profile photo",
+      )
+      .nullable()
+      .default(null),
     theme: z.enum(["light", "dark", "system"]).default("light"),
     timezone: timezoneSchema.default("Asia/Kolkata"),
     week_start: z.enum(["monday", "sunday"]).default("monday"),
