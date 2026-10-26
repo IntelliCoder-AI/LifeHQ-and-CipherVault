@@ -29,6 +29,7 @@ export async function writeEncrypted(
     const current = await transaction.store.get("vault");
     if ((current?.nonce || null) !== expectedNonce) {
       transaction.abort();
+      await transaction.done.catch(() => {});
       throw new Error(
         "The vault changed in another tab. Lock and unlock again before saving.",
       );

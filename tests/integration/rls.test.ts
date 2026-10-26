@@ -11,13 +11,13 @@ const a = "00000000-0000-4000-8000-000000000001",
   task = "00000000-0000-4000-8000-000000000004";
 async function asUser(id: string) {
   await db.exec(
-    `reset role;set role authenticated;select set_config('request.jwt.claim.sub','${id}',false);`,
+    `reset role;set role authenticated;select set_config('request.jwt.claim.sub','${id}',false);select set_config('request.jwt.claims',json_build_object('session_id','${id}')::text,false);`,
   );
 }
 beforeAll(async () => {
   db = new PGlite();
   await db.exec(
-    `create role authenticated;create role anon;alter default privileges in schema public grant execute on functions to anon;create schema auth;create table auth.users(id uuid primary key);create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id) on delete cascade);create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;grant usage on schema auth to authenticated,anon;insert into auth.users values('${a}'),('${b}');`,
+    `create role authenticated;create role anon;alter default privileges in schema public grant execute on functions to anon;create schema auth;create table auth.users(id uuid primary key,email_confirmed_at timestamptz default now(),deleted_at timestamptz,is_anonymous boolean default false);create table auth.sessions(id uuid primary key,user_id uuid references auth.users(id) on delete cascade,not_after timestamptz);create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;create function auth.jwt() returns jsonb language sql stable as $$ select coalesce(nullif(current_setting('request.jwt.claims',true),''),'{}')::jsonb $$;grant usage on schema auth to authenticated,anon;insert into auth.users(id) values('${a}'),('${b}');insert into auth.sessions(id,user_id) values('${a}','${a}'),('${b}','${b}');`,
   );
   for (const f of readdirSync("supabase/migrations")
     .filter((f) => f.endsWith(".sql"))
@@ -131,6 +131,7 @@ describe("database-enforced account isolation on real PostgreSQL (PGlite)", () =
   });
   it("rejects account erasure without a live session", async () => {
     await asUser(b);
+    await db.exec("select set_config('request.jwt.claims','{}',false)");
     await expect(db.exec("select public.delete_own_account()")).rejects.toThrow(
       "Active session required",
     );
@@ -342,13 +343,86 @@ describe("database-enforced account isolation on real PostgreSQL (PGlite)", () =
       ).rows,
     ).toHaveLength(1);
   });
+  it("rejects revoked, expired, unverified, anonymous and mismatched sessions through direct SQL", async () => {
+    const cases = [
+      `delete from auth.sessions where id='${a}'`,
+      `update auth.sessions set not_after=now()-interval '1 second' where id='${a}'`,
+      `update auth.users set email_confirmed_at=null where id='${a}'`,
+      `update auth.users set is_anonymous=true where id='${a}'`,
+      `update auth.users set deleted_at=now() where id='${a}'`,
+      `update auth.sessions set user_id='${b}' where id='${a}'`,
+    ];
+    for (const change of cases) {
+      await db.exec(`reset role;begin;${change}`);
+      await asUser(a);
+      expect((await db.query("select * from public.tasks")).rows).toEqual([]);
+      await expect(
+        db.exec(
+          `insert into public.projects(user_id,title) values('${a}','Denied')`,
+        ),
+      ).rejects.toThrow();
+      await db.exec("rollback;reset role;");
+    }
+  });
+  it("enforces JSON and tag limits even when bypassing the application API", async () => {
+    await asUser(b);
+    for (const value of [
+      "'[]'::jsonb",
+      "jsonb_build_object('name',repeat('x',100001))",
+    ]) {
+      await expect(
+        db.exec(
+          `insert into profiles(user_id,preferences) values('${b}',${value}) on conflict(user_id) do update set preferences=excluded.preferences`,
+        ),
+      ).rejects.toThrow();
+    }
+    for (const tags of [
+      "array[null]::text[]",
+      "array[repeat('x',41)]",
+      "array['   ']",
+    ]) {
+      await expect(
+        db.exec(
+          `insert into projects(user_id,title,tags) values('${b}','Denied',${tags})`,
+        ),
+      ).rejects.toThrow();
+    }
+    await expect(
+      db.exec(
+        `insert into tasks(user_id,title,due_date,recurrence) values('${b}','Too large','2026-10-25',jsonb_build_object('frequency','daily','interval',1,'weekdays','[]'::jsonb,'extra',repeat('x',2000)))`,
+      ),
+    ).rejects.toThrow();
+  });
+  it("requires recent password proof for direct account-erasure RPC calls", async () => {
+    await asUser(b);
+    for (const amr of [
+      [],
+      [{ method: "recovery", timestamp: Math.floor(Date.now() / 1000) }],
+      [{ method: "password", timestamp: Math.floor(Date.now() / 1000) - 3600 }],
+      [{ method: "password", timestamp: Math.floor(Date.now() / 1000) + 3600 }],
+    ]) {
+      await db.exec(
+        `select set_config('request.jwt.claims','${JSON.stringify({ session_id: b, amr })}',false)`,
+      );
+      await expect(
+        db.exec("select public.delete_own_account()"),
+      ).rejects.toThrow("Recent password sign-in required");
+    }
+  });
+  it("removes anonymous function execution including explicit default grants", async () => {
+    await db.exec("reset role");
+    const result = await db.query<{ allowed: boolean }>(
+      `select has_function_privilege('anon',p.oid,'EXECUTE') allowed from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname in ('public','private')`,
+    );
+    expect(result.rows.every((row) => !row.allowed)).toBe(true);
+  });
   it("deletes only the current account and its data transactionally", async () => {
     await db.exec(
       `reset role;insert into auth.sessions(id,user_id) values('00000000-0000-4000-8000-000000000010','${a}');`,
     );
     await asUser(a);
     await db.exec(
-      `select set_config('request.jwt.claims','{"session_id":"00000000-0000-4000-8000-000000000010"}',false);select public.delete_own_account();reset role;`,
+      `select set_config('request.jwt.claims','{"session_id":"00000000-0000-4000-8000-000000000010","amr":[{"method":"password","timestamp":${Math.floor(Date.now() / 1000)}}]}',false);select public.delete_own_account();reset role;`,
     );
     expect((await db.query("select id from auth.users")).rows).toEqual([
       { id: b },

@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { authCookieOptions } from "./lib/auth-cookies";
 export async function proxy(request: NextRequest) {
   // Keep PKCE verifier cookies and email callbacks on the same public origin.
   if (
@@ -23,8 +24,7 @@ export async function proxy(request: NextRequest) {
   const headers = new Headers(request.headers);
   headers.set("x-nonce", nonce);
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const origin = supabaseUrl ? new URL(supabaseUrl).origin : "";
-  const csp = `default-src 'self'; script-src 'self' 'nonce-${nonce}' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' ${origin}; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'`;
+  const csp = `default-src 'self'; script-src 'self' 'nonce-${nonce}' ${process.env.NODE_ENV === "development" ? "'unsafe-eval'" : ""}; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'`;
   headers.set("Content-Security-Policy", csp);
   let response = NextResponse.next({ request: { headers } });
   if (
@@ -37,6 +37,7 @@ export async function proxy(request: NextRequest) {
       supabaseUrl,
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
       {
+        cookieOptions: authCookieOptions,
         cookies: {
           getAll: () => request.cookies.getAll(),
           setAll(values, cacheHeaders) {

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { cascadeDelete, tables, type Data } from "@lifehq/shared";
-export const pendingDeletionSchema = z.object({
+const pendingDeletionSchema = z.object({
   id: z.uuid(),
   label: z.string().optional(),
   record_table: z.enum(tables),

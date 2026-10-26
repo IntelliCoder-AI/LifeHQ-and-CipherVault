@@ -34,6 +34,7 @@ import {
   strength,
   parseBackup,
   entrySchema,
+  safeWebsite,
   type Unlocked,
   type Envelope,
   type Entry,
@@ -70,22 +71,29 @@ export function VaultApp() {
     if (noticeTimer.current) clearTimeout(noticeTimer.current);
     noticeTimer.current = setTimeout(() => setNotice(""), 6000);
   }, []);
-  const lock = useCallback(() => {
+  const invalidateSession = useCallback(() => {
     epoch.current++;
     current.current = null;
-    setSession(null);
-    setPass("");
-    setConfirmPass("");
-    setQuery("");
-    setEditing(undefined);
-    setSelectedId(null);
-    setDeleting(null);
-    setSettings(false);
-    setRestorePass("");
-    setRestore(null);
-    setBusy(false);
-    lastActivity.current = Date.now();
   }, []);
+  const lock = useCallback(
+    (broadcast = true) => {
+      if (broadcast) channel.current?.postMessage("locked");
+      invalidateSession();
+      setSession(null);
+      setPass("");
+      setConfirmPass("");
+      setQuery("");
+      setEditing(undefined);
+      setSelectedId(null);
+      setDeleting(null);
+      setSettings(false);
+      setRestorePass("");
+      setRestore(null);
+      setBusy(false);
+      lastActivity.current = Date.now();
+    },
+    [invalidateSession],
+  );
   useEffect(() => {
     void readEncrypted()
       .then(setEnvelope)
@@ -101,20 +109,34 @@ export function VaultApp() {
     } catch {
       /* Nonsensitive preference is optional. */
     }
-    channel.current = new BroadcastChannel("ciphervault-updates");
-    channel.current.onmessage = () => {
-      lock();
-      void readEncrypted()
-        .then(setEnvelope)
-        .catch(() =>
-          setError("Unable to read the latest vault. Reload this page."),
-        );
-      notify("Vault changed in another tab. Unlock again to continue.");
-    };
+    const pagehide = () => lock();
+    window.addEventListener("pagehide", pagehide);
+    channel.current =
+      typeof BroadcastChannel === "undefined"
+        ? null
+        : new BroadcastChannel("ciphervault-updates");
+    if (channel.current)
+      channel.current.onmessage = (event) => {
+        lock(false);
+        if (event.data === "locked") {
+          notify("Vault locked in another tab.");
+          return;
+        }
+        void readEncrypted()
+          .then(setEnvelope)
+          .catch(() =>
+            setError("Unable to read the latest vault. Reload this page."),
+          );
+        notify("Vault changed in another tab. Unlock again to continue.");
+      };
     return () => {
+      invalidateSession();
+      if (noticeTimer.current) clearTimeout(noticeTimer.current);
+      window.removeEventListener("pagehide", pagehide);
       channel.current?.close();
+      channel.current = null;
     };
-  }, [lock, notify]);
+  }, [lock, notify, invalidateSession]);
   const unlocked = !!session;
   useEffect(() => {
     if (!unlocked) return;
@@ -134,12 +156,10 @@ export function VaultApp() {
     const visibility = () => {
       if (document.visibilityState === "visible") tick();
     };
-    const pagehide = () => lock();
     ["pointerdown", "keydown", "touchstart"].forEach((event) =>
       window.addEventListener(event, activity, { passive: true }),
     );
     document.addEventListener("visibilitychange", visibility);
-    window.addEventListener("pagehide", pagehide);
     const timer = setInterval(tick, 1000);
     return () => {
       clearInterval(timer);
@@ -147,7 +167,6 @@ export function VaultApp() {
         window.removeEventListener(event, activity),
       );
       document.removeEventListener("visibilitychange", visibility);
-      window.removeEventListener("pagehide", pagehide);
     };
   }, [unlocked, idleMinutes, lock, notify]);
   async function login(e: React.FormEvent) {
@@ -167,14 +186,16 @@ export function VaultApp() {
         channel.current?.postMessage("updated");
       }
       setEnvelope(unlocked.envelope);
+      if (epoch.current !== attempt) return;
       setSession(unlocked);
       setPass("");
       setConfirmPass("");
       lastActivity.current = Date.now();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Unable to open vault");
+      if (epoch.current === attempt)
+        setError(e instanceof Error ? e.message : "Unable to open vault");
     } finally {
-      setBusy(false);
+      if (epoch.current === attempt) setBusy(false);
     }
   }
   async function persist(entries: Entry[]) {
@@ -185,13 +206,13 @@ export function VaultApp() {
     if (epoch.current !== attempt)
       throw new Error("Vault locked before saving. Unlock and try again.");
     await writeEncrypted(next, active.envelope.nonce);
+    channel.current?.postMessage("updated");
     if (epoch.current !== attempt) {
       setEnvelope(next);
       return;
     }
     setEnvelope(next);
     setSession({ ...active, envelope: next, vault: { entries } });
-    channel.current?.postMessage("updated");
   }
   async function saveEntry(entry: Entry) {
     setBusy(true);
@@ -228,16 +249,27 @@ export function VaultApp() {
   ];
   async function copy(value: string) {
     try {
+      const digest = await crypto.subtle.digest(
+        "SHA-256",
+        new TextEncoder().encode(value),
+      );
       await navigator.clipboard.writeText(value);
+      value = "";
       notify("Copied. Clipboard clearing depends on browser permissions.");
       setTimeout(async () => {
         try {
           const permission = await navigator.permissions.query({
             name: "clipboard-read" as PermissionName,
           });
+          if (permission.state !== "granted") return;
+          const clipboardDigest = await crypto.subtle.digest(
+            "SHA-256",
+            new TextEncoder().encode(await navigator.clipboard.readText()),
+          );
           if (
-            permission.state === "granted" &&
-            (await navigator.clipboard.readText()) === value
+            new Uint8Array(digest).every(
+              (byte, i) => byte === new Uint8Array(clipboardDigest)[i],
+            )
           )
             await navigator.clipboard.writeText("");
         } catch {
@@ -248,6 +280,8 @@ export function VaultApp() {
       notify(
         "Clipboard access was denied. Reveal the value and copy it manually.",
       );
+    } finally {
+      value = "";
     }
   }
   return (
@@ -608,9 +642,12 @@ export function VaultApp() {
         onChange={async (e) => {
           const file = e.target.files?.[0];
           if (!file) return;
+          const attempt = epoch.current;
           try {
             if (file.size > 7_000_000) throw new Error("Backup exceeds 7 MB");
-            setRestore(parseBackup(await file.text()));
+            const backup = parseBackup(await file.text());
+            if (attempt !== epoch.current) return;
+            setRestore(backup);
             setRestorePass("");
             setError("");
           } catch (e) {
@@ -715,17 +752,21 @@ export function VaultApp() {
                   envelope?.nonce || null,
                 );
                 setEnvelope(unlocked.envelope);
+                channel.current?.postMessage("updated");
+                if (attempt !== epoch.current) return;
                 setSession(unlocked);
                 setRestore(null);
                 setRestorePass("");
                 setSelectedId(null);
                 setEditing(undefined);
-                channel.current?.postMessage("updated");
                 notify("Encrypted backup authenticated and restored");
               } catch (e) {
-                setError(e instanceof Error ? e.message : "Unable to restore");
+                if (attempt === epoch.current)
+                  setError(
+                    e instanceof Error ? e.message : "Unable to restore",
+                  );
               } finally {
-                setBusy(false);
+                if (attempt === epoch.current) setBusy(false);
               }
             }}
           >
@@ -858,9 +899,13 @@ function EntryDetail({
             {entry.url && (
               <div className="secret-field">
                 <span className="eyebrow">WEBSITE</span>
-                <a href={entry.url} rel="noopener noreferrer" target="_blank">
-                  {entry.url}
-                </a>
+                {safeWebsite(entry.url) ? (
+                  <a href={entry.url} rel="noopener noreferrer" target="_blank">
+                    {entry.url}
+                  </a>
+                ) : (
+                  <span>{entry.url}</span>
+                )}
               </div>
             )}
           </>

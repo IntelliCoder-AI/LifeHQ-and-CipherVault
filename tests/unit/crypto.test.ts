@@ -7,6 +7,9 @@ import {
   parseBackup,
   generatePassword,
   strength,
+  entrySchema,
+  vaultSchema,
+  safeWebsite,
   type Unlocked,
   type Vault,
 } from "../../apps/ciphervault/lib/crypto";
@@ -39,6 +42,38 @@ describe("CipherVault authenticated encryption", () => {
     expect(serialized).not.toContain("Dummy account");
     expect((await unlockVault(created.envelope, pass)).vault).toEqual(vault);
     expect(created.key.extractable).toBe(false);
+  });
+  it("rejects duplicate entry IDs and unsafe website URLs", () => {
+    expect(() =>
+      vaultSchema.parse({ entries: [vault.entries[0], vault.entries[0]] }),
+    ).toThrow("unique IDs");
+    for (const url of [
+      "javascript:alert(1)",
+      "https://",
+      "https://user:password@example.test",
+      "https://example.test/\npath",
+    ]) {
+      expect(entrySchema.safeParse({ ...vault.entries[0], url }).success).toBe(
+        false,
+      );
+    }
+    expect(
+      entrySchema.safeParse({
+        ...vault.entries[0],
+        url: "https://example.test/path?q=ok",
+      }).success,
+    ).toBe(true);
+  });
+  it("keeps legacy website text readable without making unsafe URLs clickable", async () => {
+    const legacy: Vault = {
+      entries: [
+        { ...vault.entries[0], url: "https://user:password@example.test" },
+      ],
+    };
+    const envelope = await encryptVault(legacy, created.key, created.envelope);
+    const restored = await unlockVault(envelope, pass);
+    expect(restored.vault).toEqual(legacy);
+    expect(safeWebsite(restored.vault.entries[0].url)).toBe(false);
   });
   it("rejects incorrect passphrases", async () => {
     await expect(

@@ -1,6 +1,6 @@
 import { argon2id } from "hash-wasm";
 import { z } from "zod";
-export const KDF = {
+const KDF = {
   algorithm: "argon2id" as const,
   memoryKiB: 65536,
   iterations: 3,
@@ -10,7 +10,7 @@ const base64 = z
   .string()
   .max(7000000)
   .regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/);
-export const envelopeSchema = z
+const envelopeSchema = z
   .object({
     format: z.literal("ciphervault"),
     version: z.literal(1),
@@ -28,17 +28,14 @@ export const envelopeSchema = z
     ciphertext: base64.min(24),
   })
   .strict();
-export const entrySchema = z
+const storedEntrySchema = z
   .object({
     id: z.uuid(),
     kind: z.enum(["credential", "note"]),
     title: z.string().trim().min(1).max(200),
     username: z.string().max(500),
     password: z.string().max(4096),
-    url: z
-      .string()
-      .max(2048)
-      .refine((v) => !v || /^https?:\/\//i.test(v), "Use an http or https URL"),
+    url: z.string().max(2048),
     notes: z.string().max(50000),
     category: z.string().trim().min(1).max(80),
     favorite: z.boolean(),
@@ -46,9 +43,38 @@ export const entrySchema = z
     updated_at: z.iso.datetime(),
   })
   .strict();
+// Preserve readable legacy vaults while requiring safe URLs for new edits/links.
+export function safeWebsite(value: string) {
+  if (/[\u0000-\u0020\u007f]/.test(value)) return false;
+  try {
+    const url = new URL(value);
+    return (
+      ["http:", "https:"].includes(url.protocol) &&
+      !url.username &&
+      !url.password
+    );
+  } catch {
+    return false;
+  }
+}
+export const entrySchema = storedEntrySchema.extend({
+  url: z
+    .string()
+    .max(2048)
+    .refine(
+      (value) => !value || safeWebsite(value),
+      "Use an http or https URL without embedded credentials",
+    ),
+});
 export const vaultSchema = z
-  .object({ entries: z.array(entrySchema).max(5000) })
-  .strict();
+  .object({ entries: z.array(storedEntrySchema).max(5000) })
+  .strict()
+  .refine(
+    (vault) =>
+      new Set(vault.entries.map((entry) => entry.id)).size ===
+      vault.entries.length,
+    "Vault entries must have unique IDs",
+  );
 export type Envelope = z.infer<typeof envelopeSchema>;
 export type Entry = z.infer<typeof entrySchema>;
 export type Vault = z.infer<typeof vaultSchema>;
@@ -96,7 +122,7 @@ export function parseBackup(text: string): Envelope {
   if (text.length > 7_000_000) throw new Error("Backup exceeds the 7 MB limit");
   return validateEnvelope(JSON.parse(text));
 }
-export function validatePassphrase(passphrase: string) {
+function validatePassphrase(passphrase: string) {
   if (passphrase.length < 16 || passphrase.length > 256)
     throw new Error(
       "Use a passphrase between 16 and 256 characters. Several unrelated words are a good start.",
@@ -140,8 +166,9 @@ export async function encryptVault(
     nonce: b64(nonce),
   };
   const plain = encoder.encode(JSON.stringify(vault));
-  if (plain.length > 4_999_984) throw new Error("Vault exceeds the 5 MB limit");
   try {
+    if (plain.length > 4_999_984)
+      throw new Error("Vault exceeds the 5 MB limit");
     const cipher = await crypto.subtle.encrypt(
       {
         name: "AES-GCM",

@@ -29,7 +29,7 @@ import {
 import { prepareImport, mergeImported } from "@lifehq/shared/import";
 import { DEMO_KEY, DEMO_USER, sampleData } from "./demo";
 import { today, type Scheduled } from "@lifehq/shared/dates";
-export type Store = {
+type Store = {
   data: Data;
   preferences: Preferences;
   demo: boolean;

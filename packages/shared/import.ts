@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { InputError } from "./errors";
 import {
   cleanValues,
   emptyData,
@@ -47,13 +48,13 @@ const envelope = z
 export function inspectBackup(input: unknown) {
   const backup = envelope.parse(input);
   if (Object.keys(backup.data).some((key) => !tables.includes(key as Table)))
-    throw new Error("The backup contains an unknown record type.");
+    throw new InputError("The backup contains an unknown record type.");
   const count = Object.values(backup.data).reduce(
     (sum, rows) => sum + rows.length,
     0,
   );
   if (count > IMPORT_LIMIT)
-    throw new Error(`Import at most ${IMPORT_LIMIT} records at a time.`);
+    throw new InputError(`Import at most ${IMPORT_LIMIT} records at a time.`);
   const data = emptyData();
   for (const table of tables) {
     const seen = new Set<string>();
@@ -61,7 +62,7 @@ export function inspectBackup(input: unknown) {
       const raw = z.record(z.string(), z.unknown()).parse(item);
       const id = z.uuid().parse(raw.id);
       if (seen.has(id))
-        throw new Error(`The backup contains duplicate ${table} IDs.`);
+        throw new InputError(`The backup contains duplicate ${table} IDs.`);
       seen.add(id);
       if (
         typeof raw.completed_at === "string" &&
@@ -77,7 +78,7 @@ export function inspectBackup(input: unknown) {
       for (const [field, target] of Object.entries(references[table] || {})) {
         const id = (row as unknown as Record<string, unknown>)[field];
         if (id && !data[target].some((record) => record.id === id))
-          throw new Error(
+          throw new InputError(
             `A ${table} record refers to a missing ${target} record. Import a complete LifeHQ export.`,
           );
       }
@@ -89,7 +90,7 @@ export function inspectBackup(input: unknown) {
   function visit(row: Row<"tasks">) {
     if (visited.has(row.id)) return;
     if (visiting.has(row.id))
-      throw new Error("The backup contains a cycle in parent tasks.");
+      throw new InputError("The backup contains a cycle in parent tasks.");
     visiting.add(row.id);
     if (row.parent_id) visit(tasksById.get(row.parent_id)!);
     visiting.delete(row.id);

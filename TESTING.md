@@ -78,3 +78,15 @@ The latest security advisor reported leaked-password protection disabled. No pai
 
 
 25 October 2026 — Settings completion: optimized LifeHQ build, both-app TypeScript checks and ESLint pass. All 71 unit/database tests pass; the changed auth handler also passes its 11-case targeted rerun. The 26 LifeHQ browser cases pass across the complete run and targeted reruns: import adds linked copies and applies optional preferences, photos resize/save/reload/remove, and confirmation feedback is one-time. The initial confirmation test selected an unrelated chart-loading status; its locator was narrowed. The photo-preview accessibility label was corrected and all major sections pass scans in both themes. Database verification confirms the import RPC is security-invoker, uses an empty search path, permits authenticated execution, and denies anonymous execution. Full new email-change delivery and password-reset inbox acceptance remain external checks; provider mail settings and billing were not changed.
+
+## Security remediation verification — 26 October 2026
+
+- Both optimized production builds, TypeScript checks and ESLint pass.
+- **86 unit/database tests pass**, including actual PostgreSQL RLS/constraint enforcement, owner isolation, revoked/expired/unconfirmed sessions, direct account-erasure AMR proof, bounded streamed bodies, sanitized errors, confirmation CSRF controls, actual Supabase SDK cookie flags, and authenticated encryption/legacy-vault compatibility.
+- **33 browser scenarios verified** against production builds. The full run passed 32; the new confirmation test initially matched both the app error and Next.js's route-announcer alert. Its locator was scoped to the app error and the targeted rerun passes. Coverage includes every existing module, themes, import/export, undo, board movement, persistence, desktop/tablet/mobile layouts, accessibility, the complete vault lifecycle, cross-tab locks, and writes finishing after page-exit locking.
+- `npm audit --json`: **0 known vulnerabilities** (733 dependency-tree entries versus 741 before cleanup). Knip was used to identify unused declarations/exports; required workspace dependencies are retained.
+- Tracked source and history credential-pattern scan: no high-confidence private-key, cloud/GitHub token or service-role credential matches. This is not a complete secret-provenance analysis.
+- Applied migrations `20261025181734_security_session_guards` and `20261025182220_bounded_data_api_inputs`. Live catalog verification: **15 restrictive active-session policies, eight validated input constraints, zero anonymously executable app functions**. Existing records passed the input-constraint preflight.
+- Supabase security advisor's remaining warning: leaked-password protection disabled. Fresh hosted inbox recovery delivery was not exercised; the previous email-quota limitation remains. Hosted response/header checks use the connector, whose authenticated fetch does not prove anonymous browser access.
+
+Detailed findings, cleanup and remaining risks: [security audit](docs/SECURITY_AUDIT_2026-10-26.md).

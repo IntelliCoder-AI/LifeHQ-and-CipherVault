@@ -54,7 +54,7 @@ describe("authenticated import endpoint", () => {
     expect((await POST(request({ backup: {} }))).status).toBe(400);
     expect(
       (await POST(request({ backup: "x".repeat(5 * 1024 * 1024) }))).status,
-    ).toBe(400);
+    ).toBe(413);
     expect(mock.rpc).not.toHaveBeenCalled();
   });
 });

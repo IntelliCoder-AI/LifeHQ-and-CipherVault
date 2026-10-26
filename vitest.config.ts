@@ -24,6 +24,10 @@ export default defineConfig({
         "./packages/shared/import.ts",
         import.meta.url,
       ).pathname,
+      "@lifehq/shared/errors": new URL(
+        "./packages/shared/errors.ts",
+        import.meta.url,
+      ).pathname,
       "@lifehq/shared": new URL("./packages/shared/index.ts", import.meta.url)
         .pathname,
       "@lifehq/ui": new URL("./packages/ui/index.tsx", import.meta.url)

@@ -6,7 +6,8 @@
     ".": "./index.ts",
     "./dates": "./dates.ts",
     "./analytics": "./analytics.ts",
-    "./import": "./import.ts"
+    "./import": "./import.ts",
+    "./errors": "./errors.ts"
   },
   "dependencies": {
     "@js-temporal/polyfill": "0.5.1",

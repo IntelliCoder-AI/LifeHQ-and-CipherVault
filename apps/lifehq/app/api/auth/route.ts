@@ -1,6 +1,13 @@
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
-import { body, failure, json, originAllowed, appOrigin } from "@/lib/api";
+import {
+  body,
+  failure,
+  InputError,
+  json,
+  originAllowed,
+  appOrigin,
+} from "@/lib/api";
 export async function POST(request: Request) {
   if (!originAllowed(request))
     return json({ error: "Request origin rejected" }, 403);
@@ -18,17 +25,18 @@ export async function POST(request: Request) {
           "change_email",
           "delete",
         ]),
-        email: z.email().optional(),
+        email: z.email().max(254).optional(),
         password: z
           .string()
           .min(12, "Use at least 12 characters")
           .max(128)
           .optional(),
         name: z.string().max(80).optional(),
-        confirmation: z.string().optional(),
+        confirmation: z.string().max(80).optional(),
         confirmPassword: z.string().max(128).optional(),
         currentPassword: z.string().min(1).max(128).optional(),
       })
+      .strict()
       .parse(await body(request));
     if (
       ["signup", "update", "change_password"].includes(input.action) &&
@@ -43,7 +51,7 @@ export async function POST(request: Request) {
       return json({ ok: true });
     }
     if (input.action === "resend") {
-      if (!input.email) throw new Error("Enter your email");
+      if (!input.email) throw new InputError("Enter your email");
       const { error } = await db.auth.resend({
         type: "signup",
         email: input.email,
@@ -57,7 +65,7 @@ export async function POST(request: Request) {
           429,
         );
       if (error && error.status && error.status >= 500)
-        throw new Error(
+        throw new InputError(
           "Email delivery is temporarily unavailable. Please try again.",
         );
       return json({
@@ -66,11 +74,11 @@ export async function POST(request: Request) {
       });
     }
     if (input.action === "reset") {
-      if (!input.email) throw new Error("Enter your email");
+      if (!input.email) throw new InputError("Enter your email");
       const { error } = await db.auth.resetPasswordForEmail(input.email, {
         redirectTo: `${origin}/auth/callback?next=/reset`,
       });
-      if (error) throw error;
+      if (error && error.code !== "user_not_found") throw error;
       return json({
         message:
           "If that address has an account, a recovery email is on its way.",
@@ -86,9 +94,9 @@ export async function POST(request: Request) {
           401,
         );
       if (!input.currentPassword)
-        throw new Error("Enter your current password.");
+        throw new InputError("Enter your current password.");
       if (input.action === "change_password") {
-        if (!input.password) throw new Error("Enter a new password.");
+        if (!input.password) throw new InputError("Enter a new password.");
         const { error: reauth } = await db.auth.signInWithPassword({
           email: user.email,
           password: input.currentPassword,
@@ -109,9 +117,9 @@ export async function POST(request: Request) {
             "Password updated. Use your new password the next time you sign in.",
         });
       }
-      if (!input.email) throw new Error("Enter your new email address.");
+      if (!input.email) throw new InputError("Enter your new email address.");
       if (input.email.toLowerCase() === user.email.toLowerCase())
-        throw new Error("Enter a different email address.");
+        throw new InputError("Enter a different email address.");
       const { error: reauth } = await db.auth.signInWithPassword({
         email: user.email,
         password: input.currentPassword,
@@ -161,7 +169,7 @@ export async function POST(request: Request) {
           },
           403,
         );
-      if (!input.password) throw new Error("Enter a new password");
+      if (!input.password) throw new InputError("Enter a new password");
       const { error } = await db.auth.updateUser({ password: input.password });
       if (error) throw error;
       return json({ ok: true });
@@ -172,19 +180,26 @@ export async function POST(request: Request) {
       } = await db.auth.getUser();
       if (!user) return json({ error: "Sign in again" }, 401);
       if (input.confirmation !== "DELETE MY ACCOUNT" || !input.password)
-        throw new Error("Confirm deletion and enter your password");
+        throw new InputError("Confirm deletion and enter your password");
       const { error: reauth } = await db.auth.signInWithPassword({
         email: user.email!,
         password: input.password,
       });
-      if (reauth) throw reauth;
+      if (reauth)
+        return json(
+          {
+            error:
+              "Your password was not accepted. Try again before deleting your account.",
+          },
+          400,
+        );
       const { error } = await db.rpc("delete_own_account");
       if (error) throw error;
       await db.auth.signOut({ scope: "local" });
       return json({ ok: true });
     }
     if (!input.email || !input.password)
-      throw new Error("Enter your email and password");
+      throw new InputError("Enter your email and password");
     if (input.action === "signup") {
       const { data, error } = await db.auth.signUp({
         email: input.email,
@@ -194,10 +209,10 @@ export async function POST(request: Request) {
           emailRedirectTo: `${origin}/auth/callback`,
         },
       });
-      if (error) throw error;
+      if (error && error.code !== "user_already_exists") throw error;
       return json({
         ok: true,
-        confirm: !data.session,
+        confirm: !data?.session,
         message: "Check your inbox to confirm your account.",
       });
     }
@@ -227,6 +242,16 @@ export async function POST(request: Request) {
     return json({ ok: true });
   } catch (error) {
     const authError = error as { code?: string; status?: number };
+    const feedback: Record<string, string> = {
+      weak_password: "Choose a stronger password with at least 12 characters.",
+      same_password: "Choose a password different from your current password.",
+      email_address_invalid: "Enter a valid email address.",
+      email_address_not_authorized:
+        "Email delivery is unavailable for this address. Try again later.",
+      session_not_found: "Your session ended. Please sign in again.",
+    };
+    if (authError.code && feedback[authError.code])
+      return json({ error: feedback[authError.code] }, 400);
     if (authError.code === "over_email_send_rate_limit")
       return json(
         {

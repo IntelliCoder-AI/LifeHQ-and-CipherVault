@@ -1,16 +1,29 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { InputError } from "@lifehq/shared/errors";
+export { InputError } from "@lifehq/shared/errors";
+const privateHeaders = {
+  "Cache-Control": "private, no-store, max-age=0",
+  Pragma: "no-cache",
+  Expires: "0",
+};
 export function originAllowed(request: Request) {
   const origin = request.headers.get("origin");
   if (!origin) return false;
   try {
-    const source = new URL(origin),
-      url = new URL(request.url);
-    const host =
-      request.headers.get("x-forwarded-host") ||
-      request.headers.get("host") ||
-      url.host;
-    return source.host === host && source.protocol === url.protocol;
+    // Do not trust caller-controlled Host / X-Forwarded-Host headers.
+    const target = new URL(request.url);
+    if (origin === target.origin) return true;
+    const source = new URL(origin);
+    // Next's local server uses its wildcard bind address in Request.url.
+    // Permit only loopback aliases of that same local port and protocol.
+    return (
+      ["0.0.0.0", "[::]"].includes(target.hostname) &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(source.hostname) &&
+      source.origin === origin &&
+      source.port === target.port &&
+      source.protocol === target.protocol
+    );
   } catch {
     return false;
   }
@@ -18,33 +31,73 @@ export function originAllowed(request: Request) {
 export function json(value: unknown, status = 200) {
   return NextResponse.json(value, {
     status,
-    headers: { "Cache-Control": "private, no-store" },
+    headers: privateHeaders,
   });
 }
-export async function body(request: Request) {
-  const raw = await request.text();
-  if (raw.length > 200000) throw new Error("Request is too large");
-  return JSON.parse(raw);
+export async function body(request: Request, limit = 200_000) {
+  if (
+    request.headers
+      .get("content-type")
+      ?.split(";", 1)[0]
+      .trim()
+      .toLowerCase() !== "application/json"
+  )
+    throw new InputError("Send a JSON request.", 415);
+  const declared = request.headers.get("content-length");
+  if (declared && (!/^\d+$/.test(declared) || Number(declared) > limit))
+    throw new InputError("Request is too large.", 413);
+  const reader = request.body?.getReader();
+  if (!reader) throw new InputError("Send a JSON request.");
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > limit) {
+        await reader.cancel();
+        throw new InputError("Request is too large.", 413);
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(size);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  try {
+    return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+  } catch {
+    throw new InputError("Send valid UTF-8 JSON.");
+  }
 }
 export function failure(error: unknown) {
+  if (error instanceof InputError)
+    return json({ error: error.message }, error.status);
   if (error instanceof ZodError)
     return json(
       {
         error: error.issues
-          .map((i) => `${i.path.join(".")}: ${i.message}`)
+          .slice(0, 5)
+          .map((i) => `${i.path.join(".")}: ${i.message}`.slice(0, 250))
           .join("; "),
       },
       400,
     );
   return json(
     {
-      error:
-        error instanceof Error
-          ? error.message
-          : "Something went wrong. Please try again.",
+      error: "Something went wrong. Please try again.",
     },
-    400,
+    500,
   );
+}
+export function privateRedirect(destination: URL) {
+  return NextResponse.redirect(destination, { headers: privateHeaders });
 }
 
 export function appOrigin(request: Request) {

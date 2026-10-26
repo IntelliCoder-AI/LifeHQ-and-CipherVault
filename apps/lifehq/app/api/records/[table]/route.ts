@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { schemas, tables, type Table } from "@lifehq/shared";
 import { supabase } from "@/lib/supabase";
-import { body, failure, json, originAllowed } from "@/lib/api";
+import { body, failure, InputError, json, originAllowed } from "@/lib/api";
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ table: string }> },
@@ -36,26 +36,46 @@ export async function POST(
       .strict()
       .parse(await body(request));
     if (input.action === "undo") {
-      if (!input.id) throw new Error("Missing deletion ID");
+      if (!input.id) throw new InputError("Missing deletion ID");
       const { error } = await db.rpc("undo_record_deletion", {
         deletion_id: input.id,
       });
-      if (error) throw error;
+      if (error) {
+        if (
+          error.code === "P0001" &&
+          [
+            "This record changed. Refresh before deleting.",
+            "The undo window has ended. Refresh your workspace.",
+          ].includes(error.message)
+        )
+          throw new InputError(error.message, 409);
+        throw error;
+      }
       return json({ ok: true });
     }
     if (input.action === "delete") {
       if (!input.id || !input.version)
-        throw new Error("Missing record version");
+        throw new InputError("Missing record version");
       const { data, error } = await db.rpc("schedule_record_deletion", {
         entity: table,
         record_id: input.id,
         record_version: input.version,
       });
-      if (error) throw error;
+      if (error) {
+        if (
+          error.code === "P0001" &&
+          [
+            "This record changed. Refresh before deleting.",
+            "The undo window has ended. Refresh your workspace.",
+          ].includes(error.message)
+        )
+          throw new InputError(error.message, 409);
+        throw error;
+      }
       return json({ deletion: data });
     }
     if (input.action === "delete_now" && table !== "habit_entries")
-      throw new Error(
+      throw new InputError(
         "Immediate deletion is only for toggling a habit check-in.",
       );
     if (input.action === "finalize") {
@@ -67,7 +87,7 @@ export async function POST(
     }
     if (input.action === "bulk") {
       if (table !== "tasks" || !input.ids || !input.status)
-        throw new Error("Invalid bulk action");
+        throw new InputError("Invalid bulk action");
       const { error } = await db
         .from("tasks")
         .update({
@@ -82,7 +102,7 @@ export async function POST(
     }
     if (input.action === "delete_now") {
       if (!input.id || !input.version)
-        throw new Error("Missing record version");
+        throw new InputError("Missing record version");
       const { data, error } = await db
         .from(table)
         .delete()
@@ -104,7 +124,8 @@ export async function POST(
       v.completed_at =
         v.status === "done" ? v.completed_at || new Date().toISOString() : null;
     }
-    if (input.id && !input.version) throw new Error("Missing record version");
+    if (input.id && !input.version)
+      throw new InputError("Missing record version");
     const query = input.id
       ? db
           .from(table)
@@ -115,7 +136,7 @@ export async function POST(
       : db.from(table).insert({ ...values, user_id: user.id });
     const { data, error } = await query.select().maybeSingle();
     if (error)
-      throw new Error(
+      throw new InputError(
         error.code === "23503"
           ? "The linked record is unavailable. Choose a record from your workspace."
           : error.code === "23505"

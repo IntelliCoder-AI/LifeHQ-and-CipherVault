@@ -328,3 +328,35 @@ test("email-confirmed feedback is shown once and removes its navigation marker",
     0,
   );
 });
+
+test("token-hash email links require explicit confirmation and remove the token from the address bar", async ({
+  page,
+}) => {
+  let consumed = false;
+  await page.route("**/api/confirm", async (route) => {
+    consumed = true;
+    expect(route.request().method()).toBe("POST");
+    expect(route.request().postDataJSON()).toEqual({
+      token_hash: "a".repeat(64),
+      type: "signup",
+    });
+    await route.fulfill({
+      status: 400,
+      contentType: "application/json",
+      body: JSON.stringify({
+        error: "This link is invalid or expired. Request a fresh email.",
+      }),
+    });
+  });
+  await page.goto(`/auth/confirm?token_hash=${"a".repeat(64)}&type=signup`);
+  await expect(page).toHaveURL(/\/auth\/confirm$/);
+  await expect(
+    page.getByRole("heading", { name: "Confirm your email.", exact: true }),
+  ).toBeVisible();
+  expect(consumed).toBe(false);
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.locator(".auth-form .error[role=alert]")).toContainText(
+    "invalid or expired",
+  );
+  expect(consumed).toBe(true);
+});

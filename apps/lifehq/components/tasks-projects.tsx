@@ -123,7 +123,7 @@ export function TaskLine({
     </div>
   );
 }
-export function TaskBoard({
+function TaskBoard({
   tasks,
   edit,
 }: {

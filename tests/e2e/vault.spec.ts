@@ -321,3 +321,128 @@ test("another tab locks stale plaintext and malformed backups do not replace the
   );
   await other.close();
 });
+
+test("pending setup and restore cannot reopen the vault after page exit; locks propagate across tabs", async ({
+  page,
+  context,
+}) => {
+  // Hold only delivery of IndexedDB completion, after the write actually commits.
+  await page.addInitScript(() => {
+    const state = window as typeof window & {
+      holdStorage: boolean;
+      storageWaiters: (() => void)[];
+    };
+    state.holdStorage = false;
+    state.storageWaiters = [];
+    const original = IDBTransaction.prototype.addEventListener;
+    IDBTransaction.prototype.addEventListener = function (
+      type: string,
+      listener: EventListenerOrEventListenerObject | null,
+      options?: boolean | AddEventListenerOptions,
+    ) {
+      if (type !== "complete" || !listener)
+        return Reflect.apply(original, this, [type, listener, options]);
+      return Reflect.apply(original, this, [
+        type,
+        (event: Event) => {
+          const deliver = () =>
+            typeof listener === "function"
+              ? listener.call(this, event)
+              : listener.handleEvent(event);
+          if (state.holdStorage && this.mode === "readwrite")
+            state.storageWaiters.push(deliver);
+          else deliver();
+        },
+        options,
+      ]);
+    };
+  });
+  const hold = () =>
+    page.evaluate(() => {
+      (window as typeof window & { holdStorage: boolean }).holdStorage = true;
+    });
+  const waitForWrite = () =>
+    expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            (window as typeof window & { storageWaiters: unknown[] })
+              .storageWaiters.length,
+        ),
+      )
+      .toBeGreaterThan(0);
+  const lockAndRelease = () =>
+    page.evaluate(() => {
+      window.dispatchEvent(new Event("pagehide"));
+      const state = window as typeof window & {
+        holdStorage: boolean;
+        storageWaiters: (() => void)[];
+      };
+      state.holdStorage = false;
+      state.storageWaiters.splice(0).forEach((deliver) => deliver());
+    });
+  await page.goto(url);
+  await expect(
+    page.getByRole("heading", {
+      name: "Create your local vault.",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page.getByLabel("Master passphrase", { exact: true }).fill(pass);
+  await page
+    .getByLabel("Confirm master passphrase", { exact: true })
+    .fill(pass);
+  await page.getByRole("checkbox").check();
+  await hold();
+  await page.getByRole("button", { name: "Create encrypted vault" }).click();
+  await waitForWrite();
+  await lockAndRelease();
+  await expect(
+    page.getByRole("heading", { name: "Welcome back.", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "New item", exact: true }),
+  ).toHaveCount(0);
+  await page.getByLabel("Master passphrase", { exact: true }).fill(pass);
+  await page.getByRole("button", { name: "Unlock vault", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "New item", exact: true }),
+  ).toBeVisible();
+  const downloadEvent = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Encrypted backup", exact: true })
+    .click();
+  const backup = await downloadEvent;
+  await page.locator("input[type=file]").setInputFiles((await backup.path())!);
+  await page.getByLabel("Backup master passphrase").fill(pass);
+  await page.getByRole("dialog").getByRole("checkbox").check();
+  await hold();
+  await page
+    .getByRole("button", { name: "Authenticate & restore", exact: true })
+    .click();
+  await waitForWrite();
+  await lockAndRelease();
+  await expect(
+    page.getByRole("heading", { name: "Welcome back.", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByLabel("Master passphrase", { exact: true }).fill(pass);
+  await page.getByRole("button", { name: "Unlock vault", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "New item", exact: true }),
+  ).toBeVisible();
+  const second = await context.newPage();
+  await second.goto(url);
+  await second.getByLabel("Master passphrase", { exact: true }).fill(pass);
+  await second
+    .getByRole("button", { name: "Unlock vault", exact: true })
+    .click();
+  await expect(
+    second.getByRole("button", { name: "New item", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Lock", exact: true }).click();
+  await expect(
+    second.getByRole("heading", { name: "Welcome back.", exact: true }),
+  ).toBeVisible();
+  await second.close();
+});

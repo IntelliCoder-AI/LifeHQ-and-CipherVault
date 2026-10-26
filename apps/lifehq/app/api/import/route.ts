@@ -1,30 +1,7 @@
 import { z } from "zod";
 import { supabase } from "@/lib/supabase";
-import { failure, json, originAllowed } from "@/lib/api";
+import { body, failure, InputError, json, originAllowed } from "@/lib/api";
 import { IMPORT_BYTES, prepareImport } from "@lifehq/shared/import";
-async function readLimited(request: Request) {
-  const reader = request.body?.getReader();
-  if (!reader) throw new Error("Choose a LifeHQ JSON export.");
-  const chunks: Uint8Array[] = [];
-  let size = 0;
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.byteLength;
-    if (size > IMPORT_BYTES) {
-      await reader.cancel();
-      throw new Error("Choose a JSON file smaller than 4 MB.");
-    }
-    chunks.push(value);
-  }
-  const bytes = new Uint8Array(size);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return JSON.parse(new TextDecoder().decode(bytes));
-}
 export async function POST(request: Request) {
   if (!originAllowed(request))
     return json({ error: "Request origin rejected" }, 403);
@@ -40,14 +17,14 @@ export async function POST(request: Request) {
         includePreferences: z.boolean().default(false),
       })
       .strict()
-      .parse(await readLimited(request));
+      .parse(await body(request, IMPORT_BYTES));
     const prepared = prepareImport(
       input.backup,
       user.id,
       input.includePreferences,
     );
     if (!prepared.count && !prepared.preferences)
-      throw new Error(
+      throw new InputError(
         "There are no records or selected preferences to import.",
       );
     const { data, error } = await db.rpc("import_workspace", {
